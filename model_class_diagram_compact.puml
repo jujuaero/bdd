@@ -1,0 +1,117 @@
+@startuml ArtConnect_Model_Compact
+skinparam backgroundColor #F5F5F5
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #333333
+skinparam classArrowColor #333333
+skinparam classAttributeIconSize 0
+skinparam linetype polyline
+skinparam padding 10
+
+' ============= ENUMS =============
+enum Status {
+    FOR_SALE
+    SOLD
+    EXHIBITED
+}
+
+' ============= VALUE OBJECTS =============
+class Discipline {
+    name: String
+}
+
+class ArtworkTag {
+    name: String
+}
+
+' ============= ENTITIES =============
+
+class Artist {
+    name: String
+    bio: String
+    birthYear: Integer
+    contactEmail: String
+    phone: String
+    city: String
+    website: String
+    socialMedia: String
+    isActive: boolean
+}
+
+class Artwork {
+    title: String
+    creationYear: Integer
+    type: String
+    medium: String
+    dimensions: String
+    description: String
+    price: double
+    status: Status
+}
+
+class Gallery {
+    name: String
+    address: String
+    ownerName: String
+    openingHours: String
+    contactPhone: String
+    rating: double
+    website: String
+}
+
+class Exhibition {
+    title: String
+    startDate: LocalDate
+    endDate: LocalDate
+    description: String
+    curatorName: String
+    theme: String
+}
+
+class Workshop {
+    title: String
+    date: LocalDateTime
+    durationMinutes: int
+    maxParticipants: int
+    price: double
+    location: String
+    description: String
+    level: String
+}
+
+class CommunityMember {
+    name: String
+    email: String
+    birthYear: Integer
+    phone: String
+    city: String
+    membershipType: String
+}
+
+class Booking {
+    bookingDate: LocalDateTime
+    paymentStatus: String
+}
+
+class Review {
+    rating: int
+    comment: String
+    reviewDate: LocalDate
+}
+
+' ============= RELATIONSHIPS =============
+
+Artwork --> Status : status
+Artist "1" --> "*" Discipline
+Artist "1" <-- "*" Artwork
+Artwork "1" --> "*" ArtworkTag
+Gallery "1" <-- "*" Exhibition
+Exhibition "*" --> "*" Artwork
+Workshop "*" --> "1" Artist : instructor
+CommunityMember "1" --> "*" Discipline : favorites
+CommunityMember "1" <-- "*" Booking
+Booking "*" --> "1" Workshop
+CommunityMember "1" <-- "*" Review
+Review "*" --> "1" Artwork
+
+@enduml
+

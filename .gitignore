@@ -1,0 +1,12 @@
+# Maven build output
+/target/
+
+# IDE files
+/.idea/
+*.iml
+/out/
+
+# OS artifacts
+.DS_Store
+__MACOSX/
+

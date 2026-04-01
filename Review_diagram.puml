@@ -1,0 +1,32 @@
+@startuml Review_Class_Diagram
+skinparam backgroundColor #F5F5F5
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #333333
+skinparam classArrowColor #333333
+
+class Review {
+    - reviewer: CommunityMember
+    - artwork: Artwork
+    - rating: int
+    - comment: String
+    - reviewDate: LocalDate
+    ---
+    + Review()
+    + Review(reviewer, artwork, rating, comment)
+    + getReviewer(): CommunityMember
+    + setReviewer(reviewer): void
+    + getArtwork(): Artwork
+    + setArtwork(artwork): void
+    + getRating(): int
+    + setRating(rating): void
+    + getComment(): String
+    + setComment(comment): void
+    + getReviewDate(): LocalDate
+    + setReviewDate(reviewDate): void
+}
+
+Review --> CommunityMember : written by
+Review --> Artwork : reviews
+
+@enduml
+

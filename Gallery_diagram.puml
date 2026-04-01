@@ -1,0 +1,42 @@
+@startuml Gallery_Class_Diagram
+skinparam backgroundColor #F5F5F5
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #333333
+skinparam classArrowColor #333333
+
+class Gallery {
+    - name: String
+    - address: String
+    - ownerName: String
+    - openingHours: String
+    - contactPhone: String
+    - rating: double
+    - website: String
+    - exhibitions: List<Exhibition>
+    ---
+    + Gallery()
+    + Gallery(name, address, rating)
+    + getName(): String
+    + setName(name): void
+    + getAddress(): String
+    + setAddress(address): void
+    + getOwnerName(): String
+    + setOwnerName(ownerName): void
+    + getOpeningHours(): String
+    + setOpeningHours(openingHours): void
+    + getContactPhone(): String
+    + setContactPhone(contactPhone): void
+    + getRating(): double
+    + setRating(rating): void
+    + getWebsite(): String
+    + setWebsite(website): void
+    + getExhibitions(): List<Exhibition>
+    + setExhibitions(exhibitions): void
+    + addExhibition(exhibition): void
+    + toString(): String
+}
+
+Gallery --> Exhibition : contains
+
+@enduml
+

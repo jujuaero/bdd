@@ -1,0 +1,44 @@
+@startuml Workshop_Class_Diagram
+skinparam backgroundColor #F5F5F5
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #333333
+skinparam classArrowColor #333333
+
+class Workshop {
+    - title: String
+    - date: LocalDateTime
+    - durationMinutes: int
+    - maxParticipants: int
+    - price: double
+    - instructor: Artist
+    - location: String
+    - description: String
+    - level: String
+    ---
+    + Workshop()
+    + Workshop(title, date, instructor, price)
+    + getTitle(): String
+    + setTitle(title): void
+    + getDate(): LocalDateTime
+    + setDate(date): void
+    + getDurationMinutes(): int
+    + setDurationMinutes(durationMinutes): void
+    + getMaxParticipants(): int
+    + setMaxParticipants(maxParticipants): void
+    + getPrice(): double
+    + setPrice(price): void
+    + getInstructor(): Artist
+    + setInstructor(instructor): void
+    + getLocation(): String
+    + setLocation(location): void
+    + getDescription(): String
+    + setDescription(description): void
+    + getLevel(): String
+    + setLevel(level): void
+    + toString(): String
+}
+
+Workshop --> Artist : taught by
+
+@enduml
+

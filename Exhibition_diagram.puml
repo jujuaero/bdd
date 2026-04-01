@@ -1,0 +1,42 @@
+@startuml Exhibition_Class_Diagram
+skinparam backgroundColor #F5F5F5
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #333333
+skinparam classArrowColor #333333
+
+class Exhibition {
+    - title: String
+    - startDate: LocalDate
+    - endDate: LocalDate
+    - description: String
+    - gallery: Gallery
+    - curatorName: String
+    - theme: String
+    - artworks: List<Artwork>
+    ---
+    + Exhibition()
+    + Exhibition(title, startDate, endDate, gallery)
+    + getTitle(): String
+    + setTitle(title): void
+    + getStartDate(): LocalDate
+    + setStartDate(startDate): void
+    + getEndDate(): LocalDate
+    + setEndDate(endDate): void
+    + getDescription(): String
+    + setDescription(description): void
+    + getGallery(): Gallery
+    + setGallery(gallery): void
+    + getCuratorName(): String
+    + setCuratorName(curatorName): void
+    + getTheme(): String
+    + setTheme(theme): void
+    + getArtworks(): List<Artwork>
+    + setArtworks(artworks): void
+    + toString(): String
+}
+
+Exhibition --> Gallery : belongs to
+Exhibition --> Artwork : exhibits
+
+@enduml
+

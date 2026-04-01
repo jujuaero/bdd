@@ -1,0 +1,55 @@
+@startuml Artwork_Class_Diagram
+skinparam backgroundColor #F5F5F5
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #333333
+skinparam classArrowColor #333333
+
+enum Status {
+    FOR_SALE
+    SOLD
+    EXHIBITED
+}
+
+class Artwork {
+    - title: String
+    - creationYear: Integer
+    - type: String
+    - medium: String
+    - dimensions: String
+    - description: String
+    - price: double
+    - status: Status
+    - artist: Artist
+    - tags: List<ArtworkTag>
+    ---
+    + Artwork()
+    + Artwork(title, creationYear, type, price, artist)
+    + getTitle(): String
+    + setTitle(title): void
+    + getCreationYear(): Integer
+    + setCreationYear(creationYear): void
+    + getType(): String
+    + setType(type): void
+    + getMedium(): String
+    + setMedium(medium): void
+    + getDimensions(): String
+    + setDimensions(dimensions): void
+    + getDescription(): String
+    + setDescription(description): void
+    + getPrice(): double
+    + setPrice(price): void
+    + getStatus(): Status
+    + setStatus(status): void
+    + getArtist(): Artist
+    + setArtist(artist): void
+    + getTags(): List<ArtworkTag>
+    + setTags(tags): void
+    + toString(): String
+}
+
+Artwork --> Status : uses
+Artwork --> Artist : belongs to
+Artwork --> ArtworkTag : has
+
+@enduml
+

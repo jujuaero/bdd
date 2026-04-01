@@ -1,0 +1,279 @@
+@startuml ArtConnect_Model_ClassDiagram
+!define ABSTRACT_COLOR #E1F5FF
+!define ENTITY_COLOR #F3E5F5
+!define ENUM_COLOR #FFF3E0
+
+skinparam backgroundColor #FAFAFA
+skinparam classBackgroundColor ENTITY_COLOR
+skinparam classArrowColor #424242
+skinparam classBorderColor #616161
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' ============= ENUMS =============
+enum Status #FFF3E0 {
+    FOR_SALE
+    SOLD
+    EXHIBITED
+}
+
+' ============= VALUE OBJECTS (lightweight entities) =============
+class Discipline #FFF3E0 {
+    -name: String
+    --
+    +getName(): String
+    +setName(String): void
+    +toString(): String
+}
+
+class ArtworkTag #FFF3E0 {
+    -name: String
+    --
+    +getName(): String
+    +setName(String): void
+    +toString(): String
+}
+
+' ============= CORE ENTITIES =============
+class Artist #E3F2FD {
+    -name: String
+    -bio: String
+    -birthYear: Integer
+    -disciplines: List<Discipline>
+    -contactEmail: String
+    -phone: String
+    -city: String
+    -website: String
+    -socialMedia: String
+    -isActive: boolean
+    -artworks: List<Artwork>
+    --
+    +getName(): String
+    +getBio(): String
+    +getBirthYear(): Integer
+    +getDisciplines(): List<Discipline>
+    +getContactEmail(): String
+    +getPhone(): String
+    +getCity(): String
+    +getWebsite(): String
+    +getSocialMedia(): String
+    +isActive(): boolean
+    +getArtworks(): List<Artwork>
+    +addArtwork(Artwork): void
+    +setters...
+    +toString(): String
+}
+
+class Artwork #E3F2FD {
+    -title: String
+    -creationYear: Integer
+    -type: String
+    -medium: String
+    -dimensions: String
+    -description: String
+    -price: double
+    -status: Status
+    -artist: Artist
+    -tags: List<ArtworkTag>
+    --
+    +getTitle(): String
+    +getCreationYear(): Integer
+    +getType(): String
+    +getMedium(): String
+    +getDimensions(): String
+    +getDescription(): String
+    +getPrice(): double
+    +getStatus(): Status
+    +getArtist(): Artist
+    +getTags(): List<ArtworkTag>
+    +setters...
+    +toString(): String
+}
+
+class Gallery #E3F2FD {
+    -name: String
+    -address: String
+    -ownerName: String
+    -openingHours: String
+    -contactPhone: String
+    -rating: double
+    -website: String
+    -exhibitions: List<Exhibition>
+    --
+    +getName(): String
+    +getAddress(): String
+    +getOwnerName(): String
+    +getOpeningHours(): String
+    +getContactPhone(): String
+    +getRating(): double
+    +getWebsite(): String
+    +getExhibitions(): List<Exhibition>
+    +addExhibition(Exhibition): void
+    +setters...
+    +toString(): String
+}
+
+class Exhibition #E3F2FD {
+    -title: String
+    -startDate: LocalDate
+    -endDate: LocalDate
+    -description: String
+    -gallery: Gallery
+    -curatorName: String
+    -theme: String
+    -artworks: List<Artwork>
+    --
+    +getTitle(): String
+    +getStartDate(): LocalDate
+    +getEndDate(): LocalDate
+    +getDescription(): String
+    +getGallery(): Gallery
+    +getCuratorName(): String
+    +getTheme(): String
+    +getArtworks(): List<Artwork>
+    +setters...
+    +toString(): String
+}
+
+class Workshop #E3F2FD {
+    -title: String
+    -date: LocalDateTime
+    -durationMinutes: int
+    -maxParticipants: int
+    -price: double
+    -instructor: Artist
+    -location: String
+    -description: String
+    -level: String
+    --
+    +getTitle(): String
+    +getDate(): LocalDateTime
+    +getDurationMinutes(): int
+    +getMaxParticipants(): int
+    +getPrice(): double
+    +getInstructor(): Artist
+    +getLocation(): String
+    +getDescription(): String
+    +getLevel(): String
+    +setters...
+    +toString(): String
+}
+
+class CommunityMember #F3E5F5 {
+    -name: String
+    -email: String
+    -birthYear: Integer
+    -phone: String
+    -city: String
+    -favoriteDisciplines: List<Discipline>
+    -membershipType: String
+    -bookings: List<Booking>
+    -reviews: List<Review>
+    --
+    +getName(): String
+    +getEmail(): String
+    +getBirthYear(): Integer
+    +getPhone(): String
+    +getCity(): String
+    +getFavoriteDisciplines(): List<Discipline>
+    +getMembershipType(): String
+    +getBookings(): List<Booking>
+    +getReviews(): List<Review>
+    +addBooking(Booking): void
+    +setters...
+    +toString(): String
+}
+
+' ============= ASSOCIATION ENTITIES =============
+class Booking #FCE4EC {
+    -workshop: Workshop
+    -member: CommunityMember
+    -bookingDate: LocalDateTime
+    -paymentStatus: String
+    --
+    +getWorkshop(): Workshop
+    +getMember(): CommunityMember
+    +getBookingDate(): LocalDateTime
+    +getPaymentStatus(): String
+    +setters...
+}
+
+class Review #FCE4EC {
+    -reviewer: CommunityMember
+    -artwork: Artwork
+    -rating: int
+    -comment: String
+    -reviewDate: LocalDate
+    --
+    +getReviewer(): CommunityMember
+    +getArtwork(): Artwork
+    +getRating(): int
+    +getComment(): String
+    +getReviewDate(): LocalDate
+    +setters...
+}
+
+' ============= RELATIONSHIPS =============
+
+' Artwork uses Status enum
+Artwork --> Status : uses
+
+' Artist - Discipline (Many-to-Many)
+Artist "1" --> "*" Discipline : disciplines
+
+' Artist - Artwork (One-to-Many, bidirectional)
+Artist "1" <-- "*" Artwork : artist
+
+' Artwork - ArtworkTag (One-to-Many)
+Artwork "1" --> "*" ArtworkTag : tags
+
+' Gallery - Exhibition (One-to-Many, bidirectional)
+Gallery "1" <-- "*" Exhibition : gallery
+
+' Exhibition - Artwork (Many-to-Many)
+Exhibition "*" --> "*" Artwork : artworks
+
+' Workshop - Artist (Many-to-One, instructor)
+Workshop "*" --> "1" Artist : instructor
+
+' CommunityMember - Discipline (Many-to-Many)
+CommunityMember "1" --> "*" Discipline : favoriteDisciplines
+
+' CommunityMember - Booking (One-to-Many, bidirectional)
+CommunityMember "1" <-- "*" Booking : member
+
+' Booking - Workshop (Many-to-One)
+Booking "*" --> "1" Workshop : workshop
+
+' CommunityMember - Review (One-to-Many, bidirectional)
+CommunityMember "1" <-- "*" Review : reviewer
+
+' Review - Artwork (Many-to-One)
+Review "*" --> "1" Artwork : artwork
+
+note right of Artist
+  Entité principale représentant
+  un créateur dans la communauté.
+  Bidirectionnel avec Artwork.
+end note
+
+note right of Artwork
+  Entité représentant une œuvre
+  créée par un artiste.
+  Peut être exposée ou réservée.
+end note
+
+note right of Gallery
+  Entité représentant une galerie
+  qui organise des expositions.
+end note
+
+note right of CommunityMember
+  Entité représentant un membre
+  de la communauté qui peut
+  réserver des ateliers et laisser
+  des avis sur les œuvres.
+end note
+
+@enduml
+

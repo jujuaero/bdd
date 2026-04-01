@@ -1,0 +1,49 @@
+@startuml Artist_Class_Diagram
+skinparam backgroundColor #F5F5F5
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #333333
+skinparam classArrowColor #333333
+
+class Artist {
+    - name: String
+    - bio: String
+    - birthYear: Integer
+    - disciplines: List<Discipline>
+    - contactEmail: String
+    - phone: String
+    - city: String
+    - website: String
+    - socialMedia: String
+    - isActive: boolean
+    - artworks: List<Artwork>
+    ---
+    + Artist()
+    + Artist(name, bio, birthYear, contactEmail, city)
+    + getName(): String
+    + setName(name): void
+    + getBio(): String
+    + setBio(bio): void
+    + getBirthYear(): Integer
+    + setBirthYear(birthYear): void
+    + getDisciplines(): List<Discipline>
+    + setDisciplines(disciplines): void
+    + getContactEmail(): String
+    + setContactEmail(contactEmail): void
+    + getPhone(): String
+    + setPhone(phone): void
+    + getCity(): String
+    + setCity(city): void
+    + getWebsite(): String
+    + setWebsite(website): void
+    + getSocialMedia(): String
+    + setSocialMedia(socialMedia): void
+    + isActive(): boolean
+    + setActive(active): void
+    + getArtworks(): List<Artwork>
+    + setArtworks(artworks): void
+    + addArtwork(artwork): void
+    + toString(): String
+}
+
+@enduml
+
