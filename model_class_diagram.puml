@@ -19,16 +19,22 @@ enum Status #FFF3E0 {
 
 ' ============= VALUE OBJECTS (lightweight entities) =============
 class Discipline #FFF3E0 {
+    -id: Long
     -name: String
     --
+    +getId(): Long
+    +setId(Long): void
     +getName(): String
     +setName(String): void
     +toString(): String
 }
 
 class ArtworkTag #FFF3E0 {
+    -id: Long
     -name: String
     --
+    +getId(): Long
+    +setId(Long): void
     +getName(): String
     +setName(String): void
     +toString(): String
@@ -36,6 +42,7 @@ class ArtworkTag #FFF3E0 {
 
 ' ============= CORE ENTITIES =============
 class Artist #E3F2FD {
+    -id: Long
     -name: String
     -bio: String
     -birthYear: Integer
@@ -48,6 +55,7 @@ class Artist #E3F2FD {
     -isActive: boolean
     -artworks: List<Artwork>
     --
+    +getId(): Long
     +getName(): String
     +getBio(): String
     +getBirthYear(): Integer
@@ -60,11 +68,13 @@ class Artist #E3F2FD {
     +isActive(): boolean
     +getArtworks(): List<Artwork>
     +addArtwork(Artwork): void
+    +setId(Long): void
     +setters...
     +toString(): String
 }
 
 class Artwork #E3F2FD {
+    -id: Long
     -title: String
     -creationYear: Integer
     -type: String
@@ -76,6 +86,7 @@ class Artwork #E3F2FD {
     -artist: Artist
     -tags: List<ArtworkTag>
     --
+    +getId(): Long
     +getTitle(): String
     +getCreationYear(): Integer
     +getType(): String
@@ -86,11 +97,13 @@ class Artwork #E3F2FD {
     +getStatus(): Status
     +getArtist(): Artist
     +getTags(): List<ArtworkTag>
+    +setId(Long): void
     +setters...
     +toString(): String
 }
 
 class Gallery #E3F2FD {
+    -id: Long
     -name: String
     -address: String
     -ownerName: String
@@ -100,6 +113,7 @@ class Gallery #E3F2FD {
     -website: String
     -exhibitions: List<Exhibition>
     --
+    +getId(): Long
     +getName(): String
     +getAddress(): String
     +getOwnerName(): String
@@ -109,11 +123,13 @@ class Gallery #E3F2FD {
     +getWebsite(): String
     +getExhibitions(): List<Exhibition>
     +addExhibition(Exhibition): void
+    +setId(Long): void
     +setters...
     +toString(): String
 }
 
 class Exhibition #E3F2FD {
+    -id: Long
     -title: String
     -startDate: LocalDate
     -endDate: LocalDate
@@ -123,6 +139,7 @@ class Exhibition #E3F2FD {
     -theme: String
     -artworks: List<Artwork>
     --
+    +getId(): Long
     +getTitle(): String
     +getStartDate(): LocalDate
     +getEndDate(): LocalDate
@@ -131,11 +148,13 @@ class Exhibition #E3F2FD {
     +getCuratorName(): String
     +getTheme(): String
     +getArtworks(): List<Artwork>
+    +setId(Long): void
     +setters...
     +toString(): String
 }
 
 class Workshop #E3F2FD {
+    -id: Long
     -title: String
     -date: LocalDateTime
     -durationMinutes: int
@@ -146,6 +165,7 @@ class Workshop #E3F2FD {
     -description: String
     -level: String
     --
+    +getId(): Long
     +getTitle(): String
     +getDate(): LocalDateTime
     +getDurationMinutes(): int
@@ -155,11 +175,13 @@ class Workshop #E3F2FD {
     +getLocation(): String
     +getDescription(): String
     +getLevel(): String
+    +setId(Long): void
     +setters...
     +toString(): String
 }
 
 class CommunityMember #F3E5F5 {
+    -id: Long
     -name: String
     -email: String
     -birthYear: Integer
@@ -170,6 +192,7 @@ class CommunityMember #F3E5F5 {
     -bookings: List<Booking>
     -reviews: List<Review>
     --
+    +getId(): Long
     +getName(): String
     +getEmail(): String
     +getBirthYear(): Integer
@@ -180,76 +203,83 @@ class CommunityMember #F3E5F5 {
     +getBookings(): List<Booking>
     +getReviews(): List<Review>
     +addBooking(Booking): void
+    +setId(Long): void
     +setters...
     +toString(): String
 }
 
 ' ============= ASSOCIATION ENTITIES =============
 class Booking #FCE4EC {
+    -id: Long
     -workshop: Workshop
     -member: CommunityMember
     -bookingDate: LocalDateTime
     -paymentStatus: String
     --
+    +getId(): Long
     +getWorkshop(): Workshop
     +getMember(): CommunityMember
     +getBookingDate(): LocalDateTime
     +getPaymentStatus(): String
+    +setId(Long): void
     +setters...
 }
 
 class Review #FCE4EC {
+    -id: Long
     -reviewer: CommunityMember
     -artwork: Artwork
     -rating: int
     -comment: String
     -reviewDate: LocalDate
     --
+    +getId(): Long
     +getReviewer(): CommunityMember
     +getArtwork(): Artwork
     +getRating(): int
     +getComment(): String
     +getReviewDate(): LocalDate
+    +setId(Long): void
     +setters...
 }
 
 ' ============= RELATIONSHIPS =============
 
-' Artwork uses Status enum
-Artwork --> Status : uses
+' Artwork use Status enum
+Artwork --> Status : utilise
 
 ' Artist - Discipline (Many-to-Many)
-Artist "1" --> "*" Discipline : disciplines
+Artist "0,n" -- "0,n" Discipline : pratique
 
 ' Artist - Artwork (One-to-Many, bidirectional)
-Artist "1" <-- "*" Artwork : artist
+Artist "1,1" -- "0,n" Artwork : crée
 
 ' Artwork - ArtworkTag (One-to-Many)
-Artwork "1" --> "*" ArtworkTag : tags
+Artwork "1,1" -- "0,n" ArtworkTag : contient
 
 ' Gallery - Exhibition (One-to-Many, bidirectional)
-Gallery "1" <-- "*" Exhibition : gallery
+Gallery "1,1" -- "0,n" Exhibition : organise
 
 ' Exhibition - Artwork (Many-to-Many)
-Exhibition "*" --> "*" Artwork : artworks
+Exhibition "0,n" -- "0,n" Artwork : expose
 
 ' Workshop - Artist (Many-to-One, instructor)
-Workshop "*" --> "1" Artist : instructor
+Artist "1,1" -- "0,n" Workshop : anime
 
 ' CommunityMember - Discipline (Many-to-Many)
-CommunityMember "1" --> "*" Discipline : favoriteDisciplines
+CommunityMember "0,n" -- "0,n" Discipline : prefere
 
 ' CommunityMember - Booking (One-to-Many, bidirectional)
-CommunityMember "1" <-- "*" Booking : member
+CommunityMember "1,1" -- "0,n" Booking : effectue
 
 ' Booking - Workshop (Many-to-One)
-Booking "*" --> "1" Workshop : workshop
+Workshop "1,1" -- "0,n" Booking : concerne
 
 ' CommunityMember - Review (One-to-Many, bidirectional)
-CommunityMember "1" <-- "*" Review : reviewer
+CommunityMember "1,1" -- "0,n" Review : redige
 
 ' Review - Artwork (Many-to-One)
-Review "*" --> "1" Artwork : artwork
+Artwork "1,1" -- "0,n" Review : recoit
 
 note right of Artist
   Entité principale représentant
