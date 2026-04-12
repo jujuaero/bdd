@@ -3,6 +3,7 @@ skinparam backgroundColor #F5F5F5
 skinparam classBackgroundColor #FFFFFF
 skinparam classBorderColor #333333
 skinparam classArrowColor #333333
+skinparam classAttributeIconSize 0
 
 class Workshop {
     - title: String
