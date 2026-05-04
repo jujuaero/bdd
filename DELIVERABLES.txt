@@ -1,0 +1,136 @@
+Livrables pour migration vers une couche de persistance JDBC - ArtConnect
+
+Objectif
+Remplacer progressivement les services "en mémoire" par une couche de persistance JDBC connectée à la base MySQL `artconnect_db`.
+
+Checklist des modifications réalisées maintenant
+- Implémentation de la configuration de connexion : `src/main/java/com/project/artconnect/util/DatabaseConfig.java`
+- Implémentation du gestionnaire de connexion JDBC : `src/main/java/com/project/artconnect/util/ConnectionManager.java`
+- Script de données à jour : `datav3.sql` (présent à la racine du projet) — contient TRUNCATE + inserts non-null
+
+Livrables attendus (étapes restantes que je peux implémenter sur demande)
+1) DAO (Data Access Objects)
+   - Compléter les interfaces existantes si nécessaire (déjà présentes dans `com.project.artconnect.dao`).
+   - Implémenter les classes JDBC (ex. `JdbcArtistDao`, `JdbcArtworkDao`, `JdbcGalleryDao`, etc.) dans `com.project.artconnect.persistence`.
+   - Utiliser PreparedStatement, transactions pour opérations multi-table, et try-with-resources.
+
+2) Services
+   - Ajouter implémentations DAO-backed dans `com.project.artconnect.service.impl` (ex. `JdbcArtistService`).
+   - Modifier `ServiceProvider` pour pouvoir basculer entre InMemory et JDBC via un flag de configuration.
+
+3) Tests
+   - Tests unitaires DAO en H2 (mode MySQL) : `src/test/java/...`.
+   - Tests d'intégration des services et scénarios manuels (UI CRUD vérifié).
+
+4) Documentation & preuves
+   - Description archi (fichier séparé ou section dans README)
+   - Captures d'écran ou vidéo de l'application fonctionnant avec la base
+
+Instructions rapides pour démarrer localement
+1) Modifier `DatabaseConfig.java` et renseigner `URL`, `USER`, `PASSWORD` correspondant à votre MySQL.
+2) Depuis votre client MySQL, créer la base et les tables si nécessaire :
+   - Exécuter `schema_artconnect.sql` puis `datav3.sql` pour peupler.
+3) Lancer l'application Java depuis votre IDE ou via `mvn javafx:run` (si configuré).
+
+Remarque
+Les prochaines étapes possibles (je peux les réaliser) :
+- Implémenter complètement les DAO JDBC pour Artist et Artwork (prioritaires).
+- Adapter `ServiceProvider` pour utiliser les services JDBC et effectuer des tests manuels UI.
+
+Modifications complètes (réalisées)
+
+Configuration et connexion:
+- Ajouté `src/main/resources/database.properties` avec url, user, password, usePersistence
+- Ajouté `src/main/java/com/project/artconnect/util/DatabaseConfig.java` (lit database.properties)
+- Modifié `src/main/java/com/project/artconnect/util/ConnectionManager.java` pour retourner une Connection JDBC
+
+DAOs JDBC (couche de persistance):
+- `JdbcArtistDao` (findAll, save, update, delete, findByCity)
+- `JdbcArtworkDao` (findAll, save, update, delete, findByArtistName)
+- `JdbcCommunityMemberDao` (findById, findAll)
+- `JdbcGalleryDao` (findById, findAll)
+- `JdbcExhibitionDao` (findAll, save, update, delete)
+- `JdbcWorkshopDao` (findById, findAll)
+Tous utilisent PreparedStatement, try-with-resources, gestion d'errours SQLException.
+
+Services JDBC (couche applicative):
+- `JdbcArtistService` (getAllArtists, getArtistByName, createArtist, updateArtist, deleteArtist, getAllDisciplines, searchArtists)
+- `JdbcArtworkService` (getAllArtworks, getArtworkByTitle, getArtworksByArtist, createArtwork, updateArtwork, deleteArtwork)
+- `JdbcCommunityService` (getAllMembers, getMemberByName, getReviewsByMember)
+- `JdbcGalleryService` (getAllGalleries, getGalleryByName, getExhibitionsByGallery)
+- `JdbcWorkshopService` (getAllWorkshops, getWorkshopByTitle, bookWorkshop, getBookingsByMember)
+
+Basculement dynamique:
+- `ServiceProvider` : quand `usePersistence=true` dans `database.properties`, les getters de service retournent des instances JDBC
+  (ArtistService, ArtworkService, CommunityService, GalleryService, WorkshopService) au lieu des implémentations InMemory.
+- Fallback automatique vers InMemory si JDBC échoue à l'initialisation.
+
+Architecture JDBC (résumé)
+1. Database layer (DAO): Directement sur les tables MySQL (artist, artwork, gallery, exhibition, workshop, community_member, etc.)
+2. Service layer: Agrège les DAOs et fournit les interfaces métier (ArtistService, ArtworkService, etc.)
+3. UI layer: Appelle ServiceProvider.getXxxService() qui retourne le service JDBC ou InMemory selon configuration
+4. Configuration: DatabaseConfig lit `database.properties` (URL, USER, PASSWORD, USE_PERSISTENCE)
+
+Schéma des relations:
+- Artist --[1:N]--> Artwork (FK artist_id dans artwork)
+- Artist --[N:M]--> Discipline (table artist_discipline)
+- Gallery --[1:N]--> Exhibition (FK gallery_id dans exhibition)
+- Exhibition --[N:M]--> Artwork (table exhibition_artwork)
+- Artwork --[1:N]--> ArtworkTag (FK artwork_id dans artwork_tag)
+- Workshop --[instructor = Artist] (FK instructor_id dans workshop)
+- Workshop --[1:N]--> Booking (FK workshop_id dans booking)
+- CommunityMember --[1:N]--> Booking (FK member_id dans booking)
+- CommunityMember --[1:N]--> Review (FK reviewer_id dans review)
+- Artwork --[reviewers]--> Review (FK artwork_id dans review)
+- CommunityMember --[N:M]--> Discipline (table member_favorite_discipline)
+
+Instructions de déploiement et test
+===========================================
+
+1. Mise à jour de database.properties
+   Ouvrez `src/main/resources/database.properties` et mettez à jour :
+   - url=jdbc:mysql://localhost:3306/artconnect_db?useSSL=false&serverTimezone=UTC
+   - user=<votre_user_mysql>
+   - password=<votre_password_mysql>
+   - usePersistence=true (pour activer l'utilisation des services JDBC)
+
+2. Création/réinitialisation de la base (PowerShell)
+   ```
+   # Créer les tables si nécessaire
+   mysql -u <user> -p < "C:\Users\jules\OneDrive - Efrei\Documents\Efrei\S6\bdd\bdd\schema_artconnect.sql"
+
+   # Vider et remplir la base
+   mysql -u <user> -p artconnect_db < "C:\Users\jules\OneDrive - Efrei\Documents\Efrei\S6\bdd\bdd\datav3.sql"
+   ```
+
+3. Lancer l'application
+   ```
+   mvn clean javafx:run -f "C:\Users\jules\OneDrive - Efrei\Documents\Efrei\S6\bdd\bdd\pom.xml"
+   ```
+
+4. Vérifications manuelles dans l'UI
+   - Écran Artist: vérifier que les artistes affichés proviennent de la DB (SELECT * FROM artist)
+   - Écran Artwork: vérifier que les oeuvres affichées proviennent de la DB
+   - Écran Gallery: vérifier les galeries et leurs expositions
+   - Écran Community: vérifier les membres de la communauté
+   - Écran Workshops: vérifier les ateliers
+
+   Vérifications CRUD:
+   - CREATE Artist: créer un nouvel artiste via l'UI → vérifier que les données sont dans la DB
+   - UPDATE Artist: modifier un artiste → vérifier mise à jour en base
+   - DELETE Artist: supprimer un artiste (attention aux contraintes FK)
+   - Pareil pour Artwork, Gallery, Workshop, Community Member
+
+Remarques finales
+=================
+- Les services JDBC et les DAO utilisent les identifiants naturels (name/title/email) fournis par les modèles.
+- Si un champ est NULL dans le modèle lors d'une insertion, il sera NULL en base. Pour éviter cela, validez/remplissez tous les champs avant create/update depuis l'UI.
+- Les relations N-N (artist_discipline, exhibition_artwork, artwork_tag, member_favorite_discipline) ne sont pas gérées automatiquement lors des inserts. Elles peuvent être ajoutées si nécessaire.
+- Le script datav3.sql remplit la base avec des données de test cohérentes (pas de NULLs explicites, respecte les FK).
+- En production, envisagez un pool de connexions (ex. HikariCP) à la place de DriverManager.getConnection().
+
+Contact
+Indiquez si vous voulez que j'implémente les DAO (par ordre : Artist -> Artwork -> CommunityMember -> Gallery -> Exhibition -> Workshop) ; je ferai :
+ - modifications de code (fichiers précis), tests unitaires et mise à jour de `ServiceProvider`.
+
+

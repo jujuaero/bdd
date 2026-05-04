@@ -55,3 +55,102 @@ graph TD
 2. Search for an artist by name or filter by discipline in the Artists Tab.
 3. View the "Discover" tab to see featured content dynamically generated.
 4. Once you implement JDBC, swap the `ServiceProvider` to use your `JdbcArtistDao` and verify data is fetched from MySQL.
+
+---
+
+## JDBC Implementation - Setup & Testing
+
+### Configuration
+Edit `src/main/resources/database.properties`:
+
+```properties
+url=jdbc:mysql://localhost:3306/artconnect_db?useSSL=false&serverTimezone=UTC
+user=<mysql_user>
+password=<mysql_password>
+usePersistence=true
+```
+
+Set `usePersistence=true` to use JDBC services; `false` for InMemory (default).
+
+### Database Setup
+
+Create schema and populate with test data:
+
+```bash
+mysql -u <user> -p < schema_artconnect.sql
+mysql -u <user> -p artconnect_db < datav3.sql
+```
+
+To reset: simply re-run `datav3.sql` (contains TRUNCATE statements).
+
+### Run with JDBC
+
+```bash
+mvn clean javafx:run
+```
+
+With `usePersistence=true`, the application will:
+1. Initialize `DatabaseConfig` from `database.properties`
+2. `ServiceProvider` returns JDBC services instead of InMemory
+3. All operations (CREATE, READ, UPDATE, DELETE) are persisted in MySQL
+
+### Testing CRUD Operations
+
+1. **Create Artist**: UI Artists tab → Add new artist → verify in MySQL
+   ```sql
+   SELECT * FROM artist WHERE name = '<new_artist>';
+   ```
+
+2. **Create Artwork**: Add artwork linked to artist → verify FK
+   ```sql
+   SELECT * FROM artwork WHERE title = '<new_artwork>';
+   ```
+
+3. **Update**: Edit artist/artwork → verify changes in DB
+4. **Delete**: Remove record → verify deletion (respects FK constraints)
+5. **List**: View artists/artworks tab → should show DB data
+
+### Implemented JDBC Components
+
+**DAOs** (in `com.project.artconnect.persistence`):
+- `JdbcArtistDao` ✓
+- `JdbcArtworkDao` ✓
+- `JdbcCommunityMemberDao` ✓
+- `JdbcGalleryDao` ✓
+- `JdbcExhibitionDao` ✓
+- `JdbcWorkshopDao` ✓
+
+**Services** (in `com.project.artconnect.service.impl`):
+- `JdbcArtistService` ✓
+- `JdbcArtworkService` ✓
+- `JdbcCommunityService` ✓
+- `JdbcGalleryService` ✓
+- `JdbcWorkshopService` ✓
+
+**Configuration** (in `com.project.artconnect.util`):
+- `DatabaseConfig` - reads `database.properties` ✓
+- `ConnectionManager` - provides JDBC connections ✓
+- `ServiceProvider` - switches between JDBC and InMemory ✓
+
+See `ARCHITECTURE.md` for full documentation and design rationale.
+
+### Troubleshooting
+
+**Connection refused**:
+- Check MySQL is running
+- Verify credentials in `database.properties`
+- Test directly: `mysql -u <user> -p -h localhost artconnect_db`
+
+**Foreign key errors**:
+- Ensure parent records exist (e.g., artist before artwork)
+- Check database constraints: `SHOW CREATE TABLE artwork;`
+
+**NULL values in DB**:
+- UI should validate and fill all fields before save
+- Or, set defaults in DAO before INSERT
+
+**ServiceProvider using InMemory instead of JDBC**:
+- Check `usePersistence=true` in `database.properties`
+- Check console for "Failed to create JdbcXxxService" error
+- Verify MySQL connection works manually
+
