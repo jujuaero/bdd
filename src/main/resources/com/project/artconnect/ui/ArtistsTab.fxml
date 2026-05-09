@@ -14,6 +14,12 @@
         <Button text="Search" onAction="#handleSearch" />
         <Button text="Reset" onAction="#handleReset" />
     </HBox>
+    <HBox spacing="10.0" alignment="CENTER_LEFT">
+        <Button text="Add" onAction="#handleAddArtist" />
+        <Button text="Edit" onAction="#handleEditArtist" />
+        <Button text="Delete" onAction="#handleDeleteArtist" />
+        <Button text="Refresh" onAction="#handleRefresh" />
+    </HBox>
     <TableView fx:id="artistTable" VBox.vgrow="ALWAYS">
         <columns>
             <TableColumn fx:id="nameColumn" text="Name" prefWidth="200" />

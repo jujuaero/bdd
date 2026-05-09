@@ -24,14 +24,24 @@ public class DiscoverController {
     public void initialize() {
         // Collect some exhibitions from galleries
         List<Exhibition> featuredExhibitions = new ArrayList<>();
-        for (Gallery g : galleryService.getAllGalleries()) {
+        List<Gallery> galleries = galleryService.getAllGalleries();
+        System.out.println("[Discover] Galleries loaded: " + galleries.size());
+
+        for (Gallery g : galleries) {
+            System.out.println("  - Gallery: " + g.getName() + " with " + g.getExhibitions().size() + " exhibitions");
             featuredExhibitions.addAll(g.getExhibitions());
             if (featuredExhibitions.size() >= 3)
                 break;
         }
 
+        System.out.println("[Discover] Total exhibitions: " + featuredExhibitions.size());
         featuredExhibitions.stream().limit(3).forEach(this::addExhibitionCard);
-        workshopService.getAllWorkshops().stream().limit(3).forEach(this::addWorkshopCard);
+
+        List<Workshop> workshops = workshopService.getAllWorkshops();
+        System.out.println("[Discover] Workshops loaded: " + workshops.size());
+        workshops.stream().limit(3).forEach(this::addWorkshopCard);
+
+        System.out.println("[Discover] UI updated with " + discoverPane.getChildren().size() + " cards");
     }
 
     private void addExhibitionCard(Exhibition e) {

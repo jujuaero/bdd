@@ -69,4 +69,46 @@ public class InMemoryGalleryService implements GalleryService {
             return Collections.emptyList();
         return gallery.getExhibitions();
     }
+
+    @Override
+    public void createGallery(Gallery gallery) {
+        if (gallery != null && gallery.getName() != null) {
+            galleries.put(gallery.getName(), gallery);
+        }
+    }
+
+    @Override
+    public void updateGallery(Gallery gallery) {
+        createGallery(gallery);
+    }
+
+    @Override
+    public void deleteGallery(String name) {
+        galleries.remove(name);
+    }
+
+    @Override
+    public void createExhibition(Exhibition exhibition) {
+        if (exhibition == null || exhibition.getGallery() == null || exhibition.getGallery().getName() == null) return;
+        Gallery target = galleries.get(exhibition.getGallery().getName());
+        if (target != null) {
+            target.getExhibitions().add(exhibition);
+            exhibition.setGallery(target);
+        }
+    }
+
+    @Override
+    public void updateExhibition(Exhibition exhibition) {
+        if (exhibition == null) return;
+        deleteExhibition(exhibition.getTitle());
+        createExhibition(exhibition);
+    }
+
+    @Override
+    public void deleteExhibition(String title) {
+        if (title == null) return;
+        for (Gallery g : galleries.values()) {
+            g.getExhibitions().removeIf(e -> title.equals(e.getTitle()));
+        }
+    }
 }
