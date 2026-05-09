@@ -1,0 +1,164 @@
+@startuml MCD_ArtConnect
+' MCD/ERD conceptuel aligne avec le MLD et le schema SQL
+hide circle
+skinparam backgroundColor #FAFAFA
+skinparam linetype ortho
+skinparam shadowing false
+skinparam entity {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+}
+
+entity "ARTIST" as artist {
+  * id : identifiant
+  --
+  name
+  bio
+  birth_year
+  contact_email
+  phone
+  city
+  website
+  social_media
+  is_active
+}
+
+entity "DISCIPLINE" as discipline {
+  * id : identifiant
+  --
+  name
+}
+
+entity "ARTWORK" as artwork {
+  * id : identifiant
+  --
+  title
+  creation_year
+  type
+  medium
+  dimensions
+  description
+  price
+  status
+}
+
+entity "ARTWORK_TAG" as artwork_tag {
+  * id : identifiant
+  --
+  name
+}
+
+entity "GALLERY" as gallery {
+  * id : identifiant
+  --
+  name
+  address
+  owner_name
+  opening_hours
+  contact_phone
+  rating
+  website
+}
+
+entity "EXHIBITION" as exhibition {
+  * id : identifiant
+  --
+  title
+  start_date
+  end_date
+  description
+  curator_name
+  theme
+}
+
+entity "WORKSHOP" as workshop {
+  * id : identifiant
+  --
+  title
+  date_time
+  duration_minutes
+  max_participants
+  price
+  location
+  description
+  level
+}
+
+entity "COMMUNITY_MEMBER" as member {
+  * id : identifiant
+  --
+  name
+  email
+  birth_year
+  phone
+  city
+  membership_type
+}
+
+entity "BOOKING" as booking {
+  * id : identifiant
+  --
+  booking_date
+  payment_status
+}
+
+entity "REVIEW" as review {
+  * id : identifiant
+  --
+  rating
+  comment
+  review_date
+}
+
+entity "ARTIST_DISCIPLINE" as artist_discipline {
+  * artist_id : FK
+  * discipline_id : FK
+}
+
+entity "EXHIBITION_ARTWORK" as exhibition_artwork {
+  * exhibition_id : FK
+  * artwork_id : FK
+}
+
+entity "MEMBER_FAVORITE_DISCIPLINE" as member_fav_discipline {
+  * member_id : FK
+  * discipline_id : FK
+}
+
+' Relations conceptuelles (cardinalites texte)
+artist "1,1" -- "0,N" artwork : creates
+artwork "1,1" -- "0,N" artwork_tag : has
+
+gallery "1,1" -- "0,N" exhibition : organizes
+exhibition "0,N" -- "0,N" artwork : presents
+
+artist "1,1" -- "0,N" workshop : instructs
+member "1,1" -- "0,N" booking : makes
+workshop "1,1" -- "0,N" booking : receives
+
+member "1,1" -- "0,N" review : writes
+artwork "1,1" -- "0,N" review : receives
+
+' Relations N-N via entites associatives
+artist "1,1" -- "0,N" artist_discipline
+discipline "1,1" -- "0,N" artist_discipline
+
+exhibition "1,1" -- "0,N" exhibition_artwork
+artwork "1,1" -- "0,N" exhibition_artwork
+
+member "1,1" -- "0,N" member_fav_discipline
+discipline "1,1" -- "0,N" member_fav_discipline
+
+note bottom of artwork
+status in {FOR_SALE, SOLD, EXHIBITED}
+end note
+
+legend right
+| Notation | Sens |
+| * | attribut identifiant |
+| 1,1 -- 0,N | 1 a N |
+| 0,N -- 0,N | N a N |
+endlegend
+
+@enduml
+

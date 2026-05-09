@@ -1,58 +1,144 @@
-# Modèle logique de données (MLD) — ArtConnect
+# Modele logique de donnees (MLD) - ArtConnect
 
-## Schéma relationnel
+Ce MLD est derive de `diagram/model_class_diagram.puml`.
 
-discipline(i̲d̲, name)
-artist(i̲d̲, name, bio, birth_year, contact_email, phone, city, website, social_media, is_active)
-artist_discipline(i̲d̲_artist, i̲d̲_discipline)
-artwork(i̲d̲, artist_id, title, creation_year, type, medium, dimensions, description, price, status)
-artwork_tag(i̲d̲, artwork_id, name)
-gallery(i̲d̲, name, address, owner_name, opening_hours, contact_phone, rating, website)
-exhibition(i̲d̲, gallery_id, title, start_date, end_date, description, curator_name, theme)
-exhibition_artwork(i̲d̲_exhibition, i̲d̲_artwork)
-workshop(i̲d̲, instructor_id, title, date_time, duration_minutes, max_participants, price, location, description, level)
-community_member(i̲d̲, name, email, birth_year, phone, city, membership_type)
-member_favorite_discipline(i̲d̲_member, i̲d̲_discipline)
-booking(i̲d̲, workshop_id, member_id, booking_date, payment_status)
-review(i̲d̲, reviewer_id, artwork_id, rating, comment, review_date)
+## 1) Schema relationnel (PK/FK)
 
-## Clés étrangères
+- `discipline`(
+  `id` PK,
+  `name` UNIQUE NOT NULL
+)
 
-- `artist_discipline.artist_id` → `artist.id`
-- `artist_discipline.discipline_id` → `discipline.id`
-- `artwork.artist_id` → `artist.id`
-- `artwork_tag.artwork_id` → `artwork.id`
-- `exhibition.gallery_id` → `gallery.id`
-- `exhibition_artwork.exhibition_id` → `exhibition.id`
-- `exhibition_artwork.artwork_id` → `artwork.id`
-- `workshop.instructor_id` → `artist.id`
-- `member_favorite_discipline.member_id` → `community_member.id`
-- `member_favorite_discipline.discipline_id` → `discipline.id`
-- `booking.workshop_id` → `workshop.id`
-- `booking.member_id` → `community_member.id`
-- `review.reviewer_id` → `community_member.id`
-- `review.artwork_id` → `artwork.id`
+- `artist`(
+  `id` PK,
+  `name` NOT NULL,
+  `bio`,
+  `birth_year`,
+  `contact_email` UNIQUE,
+  `phone`,
+  `city`,
+  `website`,
+  `social_media`,
+  `is_active` NOT NULL
+)
 
-## Contraintes principales
+- `artist_discipline`(
+  `artist_id` PK FK -> `artist.id`,
+  `discipline_id` PK FK -> `discipline.id`
+)
 
-- `artist.contact_email` est unique.
-- `community_member.email` est unique.
-- `artwork.status` prend les valeurs `FOR_SALE`, `SOLD` ou `EXHIBITED`.
-- `artwork_tag` est rattaché à une seule œuvre via `artwork_id`.
-- `review` possède une contrainte d’unicité sur (`reviewer_id`, `artwork_id`).
-- Les tables `artist_discipline`, `exhibition_artwork` et `member_favorite_discipline` sont des tables d’association.
+- `artwork`(
+  `id` PK,
+  `artist_id` FK -> `artist.id` NOT NULL,
+  `title` NOT NULL,
+  `creation_year`,
+  `type`,
+  `medium`,
+  `dimensions`,
+  `description`,
+  `price`,
+  `status` NOT NULL CHECK (`status` IN ('FOR_SALE','SOLD','EXHIBITED'))
+)
 
-## Lecture métier
+- `artwork_tag`(
+  `id` PK,
+  `artwork_id` FK -> `artwork.id` NOT NULL,
+  `name` NOT NULL,
+  UNIQUE (`artwork_id`, `name`)
+)
 
-- Un artiste peut être lié à plusieurs disciplines.
-- Un artiste peut créer plusieurs œuvres.
-- Une œuvre peut avoir plusieurs tags.
-- Une galerie peut organiser plusieurs expositions.
-- Une exposition peut présenter plusieurs œuvres.
-- Un artiste peut animer plusieurs ateliers.
-- Un membre peut avoir plusieurs disciplines favorites.
-- Un membre peut effectuer plusieurs réservations.
-- Un atelier peut recevoir plusieurs réservations.
-- Un membre peut rédiger plusieurs avis.
-- Une œuvre peut recevoir plusieurs avis.
+- `gallery`(
+  `id` PK,
+  `name` NOT NULL,
+  `address`,
+  `owner_name`,
+  `opening_hours`,
+  `contact_phone`,
+  `rating` CHECK (`rating` IS NULL OR (`rating` >= 0 AND `rating` <= 5)),
+  `website`
+)
+
+- `exhibition`(
+  `id` PK,
+  `gallery_id` FK -> `gallery.id` NOT NULL,
+  `title` NOT NULL,
+  `start_date` NOT NULL,
+  `end_date` NOT NULL,
+  `description`,
+  `curator_name`,
+  `theme`,
+  CHECK (`end_date` >= `start_date`)
+)
+
+- `exhibition_artwork`(
+  `exhibition_id` PK FK -> `exhibition.id`,
+  `artwork_id` PK FK -> `artwork.id`
+)
+
+- `workshop`(
+  `id` PK,
+  `instructor_id` FK -> `artist.id` NOT NULL,
+  `title` NOT NULL,
+  `date_time` NOT NULL,
+  `duration_minutes` NOT NULL CHECK (`duration_minutes` > 0),
+  `max_participants` NOT NULL CHECK (`max_participants` > 0),
+  `price`,
+  `location`,
+  `description`,
+  `level`
+)
+
+- `community_member`(
+  `id` PK,
+  `name` NOT NULL,
+  `email` UNIQUE NOT NULL,
+  `birth_year`,
+  `phone`,
+  `city`,
+  `membership_type`
+)
+
+- `member_favorite_discipline`(
+  `member_id` PK FK -> `community_member.id`,
+  `discipline_id` PK FK -> `discipline.id`
+)
+
+- `booking`(
+  `id` PK,
+  `workshop_id` FK -> `workshop.id` NOT NULL,
+  `member_id` FK -> `community_member.id` NOT NULL,
+  `booking_date` NOT NULL,
+  `payment_status` NOT NULL
+)
+
+- `review`(
+  `id` PK,
+  `reviewer_id` FK -> `community_member.id` NOT NULL,
+  `artwork_id` FK -> `artwork.id` NOT NULL,
+  `rating` NOT NULL CHECK (`rating` BETWEEN 1 AND 5),
+  `comment`,
+  `review_date` NOT NULL,
+  UNIQUE (`reviewer_id`, `artwork_id`)
+)
+
+## 2) Transformation UML -> relationnel
+
+- `Artist 1,N Artwork` -> FK `artwork.artist_id`
+- `Gallery 1,N Exhibition` -> FK `exhibition.gallery_id`
+- `Artist 1,N Workshop` -> FK `workshop.instructor_id`
+- `Workshop 1,N Booking` + `CommunityMember 1,N Booking` -> FKs `booking.workshop_id`, `booking.member_id`
+- `CommunityMember 1,N Review` + `Artwork 1,N Review` -> FKs `review.reviewer_id`, `review.artwork_id`
+- `Artist N,N Discipline` -> table d'association `artist_discipline`
+- `Exhibition N,N Artwork` -> table d'association `exhibition_artwork`
+- `CommunityMember N,N Discipline` -> table d'association `member_favorite_discipline`
+- `Artwork 1,N ArtworkTag` -> FK `artwork_tag.artwork_id`
+
+## 3) Regles de gestion importantes
+
+- Un email artiste (si renseigne) est unique.
+- Un email membre est obligatoire et unique.
+- Une oeuvre a un statut parmi: `FOR_SALE`, `SOLD`, `EXHIBITED`.
+- Un membre ne peut laisser qu'un seul avis par oeuvre.
+- Une exposition ne peut pas finir avant sa date de debut.
+- Duree et capacite d'un workshop sont strictement positives.
 
