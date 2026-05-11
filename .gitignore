@@ -12,3 +12,4 @@ __MACOSX/
 
 
 /src/main/java/com/project/artconnect/config/DatabaseConfig.java
+src/main/resources/database.properties
