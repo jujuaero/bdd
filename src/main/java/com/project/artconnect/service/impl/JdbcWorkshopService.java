@@ -93,5 +93,80 @@ public class JdbcWorkshopService implements WorkshopService {
         }
         return res;
     }
+
+    @Override
+    public void createWorkshop(Workshop workshop) {
+        String findArtist = "SELECT id FROM artist WHERE name = ?";
+        String insert = "INSERT INTO workshop (instructor_id, title, date_time, duration_minutes, max_participants, price, location, description, level) VALUES (?,?,?,?,?,?,?,?,?)";
+        try (Connection conn = ConnectionManager.getConnection()) {
+            conn.setAutoCommit(false);
+            long artistId;
+            try (PreparedStatement ps = conn.prepareStatement(findArtist)) {
+                ps.setString(1, workshop.getInstructor() != null ? workshop.getInstructor().getName() : null);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) throw new RuntimeException("Artist not found: " + (workshop.getInstructor() != null ? workshop.getInstructor().getName() : "null"));
+                    artistId = rs.getLong("id");
+                }
+            }
+            try (PreparedStatement ps = conn.prepareStatement(insert)) {
+                ps.setLong(1, artistId);
+                ps.setString(2, workshop.getTitle());
+                ps.setTimestamp(3, workshop.getDate() != null ? Timestamp.valueOf(workshop.getDate()) : null);
+                ps.setInt(4, workshop.getDurationMinutes());
+                ps.setInt(5, workshop.getMaxParticipants());
+                ps.setDouble(6, workshop.getPrice());
+                ps.setString(7, workshop.getLocation());
+                ps.setString(8, workshop.getDescription());
+                ps.setString(9, workshop.getLevel());
+                ps.executeUpdate();
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error saving workshop", e);
+        }
+    }
+
+    @Override
+    public void updateWorkshop(Workshop workshop) {
+        String findArtist = "SELECT id FROM artist WHERE name = ?";
+        String update = "UPDATE workshop SET instructor_id=?, date_time=?, duration_minutes=?, max_participants=?, price=?, location=?, description=?, level=? WHERE title=?";
+        try (Connection conn = ConnectionManager.getConnection()) {
+            conn.setAutoCommit(false);
+            long artistId;
+            try (PreparedStatement ps = conn.prepareStatement(findArtist)) {
+                ps.setString(1, workshop.getInstructor() != null ? workshop.getInstructor().getName() : null);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) throw new RuntimeException("Artist not found: " + (workshop.getInstructor() != null ? workshop.getInstructor().getName() : "null"));
+                    artistId = rs.getLong("id");
+                }
+            }
+            try (PreparedStatement ps = conn.prepareStatement(update)) {
+                ps.setLong(1, artistId);
+                ps.setTimestamp(2, workshop.getDate() != null ? Timestamp.valueOf(workshop.getDate()) : null);
+                ps.setInt(3, workshop.getDurationMinutes());
+                ps.setInt(4, workshop.getMaxParticipants());
+                ps.setDouble(5, workshop.getPrice());
+                ps.setString(6, workshop.getLocation());
+                ps.setString(7, workshop.getDescription());
+                ps.setString(8, workshop.getLevel());
+                ps.setString(9, workshop.getTitle());
+                ps.executeUpdate();
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating workshop", e);
+        }
+    }
+
+    @Override
+    public void deleteWorkshop(String title) {
+        String sql = "DELETE FROM workshop WHERE title = ?";
+        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, title);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error deleting workshop", e);
+        }
+    }
 }
 

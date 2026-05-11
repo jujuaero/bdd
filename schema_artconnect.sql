@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS artwork (
     medium VARCHAR(100),
     dimensions VARCHAR(100),
     description TEXT,
-    price DECIMAL(10,2),
+    price DECIMAL(15,2),
     status VARCHAR(20) NOT NULL,
     PRIMARY KEY (id),
     KEY idx_artwork_artist_id (artist_id),

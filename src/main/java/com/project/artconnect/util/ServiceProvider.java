@@ -96,4 +96,49 @@ public class ServiceProvider {
         }
         return communityService;
     }
+
+    // New services: Discipline, Booking, Review, ArtworkTag
+    public static com.project.artconnect.service.DisciplineService getDisciplineService() {
+        if (DatabaseConfig.USE_PERSISTENCE) {
+            try {
+                return new com.project.artconnect.service.impl.JdbcDisciplineService();
+            } catch (Throwable t) {
+                System.err.println("Failed to create JdbcDisciplineService, using InMemory: " + t.getMessage());
+            }
+        }
+        return new com.project.artconnect.service.impl.InMemoryDisciplineService();
+    }
+
+    public static com.project.artconnect.service.BookingService getBookingService() {
+        if (DatabaseConfig.USE_PERSISTENCE) {
+            try {
+                return new com.project.artconnect.service.impl.JdbcBookingService();
+            } catch (Throwable t) {
+                System.err.println("Failed to create JdbcBookingService, using InMemory: " + t.getMessage());
+            }
+        }
+        return new com.project.artconnect.service.impl.InMemoryBookingService();
+    }
+
+    public static com.project.artconnect.service.ReviewService getReviewService() {
+        if (DatabaseConfig.USE_PERSISTENCE) {
+            try {
+                return new com.project.artconnect.service.impl.JdbcReviewService();
+            } catch (Throwable t) {
+                System.err.println("Failed to create JdbcReviewService, using InMemory: " + t.getMessage());
+            }
+        }
+        return new com.project.artconnect.service.impl.InMemoryReviewService();
+    }
+
+    public static com.project.artconnect.service.ArtworkTagService getArtworkTagService() {
+        if (DatabaseConfig.USE_PERSISTENCE) {
+            try {
+                return new com.project.artconnect.service.impl.JdbcArtworkTagService();
+            } catch (Throwable t) {
+                System.err.println("Failed to create JdbcArtworkTagService, using InMemory: " + t.getMessage());
+            }
+        }
+        return new com.project.artconnect.service.impl.InMemoryArtworkTagService();
+    }
 }
