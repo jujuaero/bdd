@@ -35,29 +35,15 @@ public class JdbcWorkshopService implements WorkshopService {
     @Override
     public void bookWorkshop(Workshop workshop, CommunityMember member) {
         if (workshop == null || member == null) return;
-        String findWorkshop = "SELECT id FROM workshop WHERE title = ?";
-        String findMember = "SELECT id FROM community_member WHERE name = ?";
         String insert = "INSERT INTO booking (workshop_id, member_id, booking_date, payment_status) VALUES (?,?,?,?)";
         try (Connection conn = ConnectionManager.getConnection()) {
             conn.setAutoCommit(false);
-            long workshopId, memberId;
-            try (PreparedStatement psW = conn.prepareStatement(findWorkshop)) {
-                psW.setString(1, workshop.getTitle());
-                try (ResultSet rs = psW.executeQuery()) {
-                    if (!rs.next()) throw new RuntimeException("Workshop not found: " + workshop.getTitle());
-                    workshopId = rs.getLong("id");
-                }
-            }
-            try (PreparedStatement psM = conn.prepareStatement(findMember)) {
-                psM.setString(1, member.getName());
-                try (ResultSet rs = psM.executeQuery()) {
-                    if (!rs.next()) throw new RuntimeException("Member not found: " + member.getName());
-                    memberId = rs.getLong("id");
-                }
+            if (workshop.getId() == null || member.getId() == null) {
+                throw new RuntimeException("Workshop and member ids are required for booking");
             }
             try (PreparedStatement psIns = conn.prepareStatement(insert)) {
-                psIns.setLong(1, workshopId);
-                psIns.setLong(2, memberId);
+                psIns.setLong(1, workshop.getId());
+                psIns.setLong(2, member.getId());
                 psIns.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
                 psIns.setString(4, "PENDING");
                 psIns.executeUpdate();
@@ -72,14 +58,15 @@ public class JdbcWorkshopService implements WorkshopService {
     public List<Booking> getBookingsByMember(CommunityMember member) {
         if (member == null) return Collections.emptyList();
         List<Booking> res = new ArrayList<>();
-        String sql = "SELECT w.title, b.booking_date, b.payment_status FROM booking b JOIN workshop w ON b.workshop_id = w.id "
-                + "JOIN community_member cm ON b.member_id = cm.id WHERE cm.name = ?";
+        String sql = "SELECT w.id as workshop_id, w.title, b.booking_date, b.payment_status FROM booking b JOIN workshop w ON b.workshop_id = w.id "
+                + "JOIN community_member cm ON b.member_id = cm.id WHERE cm.id = ?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, member.getName());
+            ps.setLong(1, member.getId());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Booking b = new Booking();
                     Workshop w = new Workshop();
+                    w.setId(rs.getLong("workshop_id"));
                     w.setTitle(rs.getString("title"));
                     b.setWorkshop(w);
                     b.setMember(member);
@@ -96,20 +83,14 @@ public class JdbcWorkshopService implements WorkshopService {
 
     @Override
     public void createWorkshop(Workshop workshop) {
-        String findArtist = "SELECT id FROM artist WHERE name = ?";
         String insert = "INSERT INTO workshop (instructor_id, title, date_time, duration_minutes, max_participants, price, location, description, level) VALUES (?,?,?,?,?,?,?,?,?)";
         try (Connection conn = ConnectionManager.getConnection()) {
             conn.setAutoCommit(false);
-            long artistId;
-            try (PreparedStatement ps = conn.prepareStatement(findArtist)) {
-                ps.setString(1, workshop.getInstructor() != null ? workshop.getInstructor().getName() : null);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (!rs.next()) throw new RuntimeException("Artist not found: " + (workshop.getInstructor() != null ? workshop.getInstructor().getName() : "null"));
-                    artistId = rs.getLong("id");
-                }
+            if (workshop.getInstructor() == null || workshop.getInstructor().getId() == null) {
+                throw new RuntimeException("Instructor id is required to create workshop");
             }
-            try (PreparedStatement ps = conn.prepareStatement(insert)) {
-                ps.setLong(1, artistId);
+            try (PreparedStatement ps = conn.prepareStatement(insert, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+                ps.setLong(1, workshop.getInstructor().getId());
                 ps.setString(2, workshop.getTitle());
                 ps.setTimestamp(3, workshop.getDate() != null ? Timestamp.valueOf(workshop.getDate()) : null);
                 ps.setInt(4, workshop.getDurationMinutes());
@@ -119,6 +100,7 @@ public class JdbcWorkshopService implements WorkshopService {
                 ps.setString(8, workshop.getDescription());
                 ps.setString(9, workshop.getLevel());
                 ps.executeUpdate();
+                try (ResultSet keys = ps.getGeneratedKeys()) { if (keys.next()) workshop.setId(keys.getLong(1)); }
             }
             conn.commit();
         } catch (SQLException e) {
@@ -128,20 +110,17 @@ public class JdbcWorkshopService implements WorkshopService {
 
     @Override
     public void updateWorkshop(Workshop workshop) {
-        String findArtist = "SELECT id FROM artist WHERE name = ?";
-        String update = "UPDATE workshop SET instructor_id=?, date_time=?, duration_minutes=?, max_participants=?, price=?, location=?, description=?, level=? WHERE title=?";
+        String update = "UPDATE workshop SET instructor_id=?, date_time=?, duration_minutes=?, max_participants=?, price=?, location=?, description=?, level=? WHERE id=?";
         try (Connection conn = ConnectionManager.getConnection()) {
             conn.setAutoCommit(false);
-            long artistId;
-            try (PreparedStatement ps = conn.prepareStatement(findArtist)) {
-                ps.setString(1, workshop.getInstructor() != null ? workshop.getInstructor().getName() : null);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (!rs.next()) throw new RuntimeException("Artist not found: " + (workshop.getInstructor() != null ? workshop.getInstructor().getName() : "null"));
-                    artistId = rs.getLong("id");
-                }
+            if (workshop.getId() == null) {
+                throw new RuntimeException("Workshop id is required to update workshop");
             }
             try (PreparedStatement ps = conn.prepareStatement(update)) {
-                ps.setLong(1, artistId);
+                if (workshop.getInstructor() == null || workshop.getInstructor().getId() == null) {
+                    throw new RuntimeException("Instructor id is required to update workshop");
+                }
+                ps.setLong(1, workshop.getInstructor().getId());
                 ps.setTimestamp(2, workshop.getDate() != null ? Timestamp.valueOf(workshop.getDate()) : null);
                 ps.setInt(3, workshop.getDurationMinutes());
                 ps.setInt(4, workshop.getMaxParticipants());
@@ -149,7 +128,7 @@ public class JdbcWorkshopService implements WorkshopService {
                 ps.setString(6, workshop.getLocation());
                 ps.setString(7, workshop.getDescription());
                 ps.setString(8, workshop.getLevel());
-                ps.setString(9, workshop.getTitle());
+                ps.setLong(9, workshop.getId());
                 ps.executeUpdate();
             }
             conn.commit();
@@ -159,10 +138,10 @@ public class JdbcWorkshopService implements WorkshopService {
     }
 
     @Override
-    public void deleteWorkshop(String title) {
-        String sql = "DELETE FROM workshop WHERE title = ?";
+    public void deleteWorkshop(Long id) {
+        String sql = "DELETE FROM workshop WHERE id = ?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, title);
+            ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error deleting workshop", e);

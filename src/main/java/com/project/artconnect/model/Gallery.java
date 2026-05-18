@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Gallery {
+    private Long id;
     private String name;
     private String address;
     private String ownerName;
@@ -14,6 +15,14 @@ public class Gallery {
     private List<Exhibition> exhibitions = new ArrayList<>();
 
     public Gallery() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Gallery(String name, String address, double rating) {

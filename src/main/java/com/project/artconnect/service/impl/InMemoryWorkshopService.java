@@ -29,6 +29,7 @@ public class InMemoryWorkshopService implements WorkshopService {
         if (instructor == null)
             return;
         Workshop w = new Workshop(title, date, instructor, price);
+        w.setId((long) (workshops.size() + 1));
         w.setLevel(level);
         w.setLocation(location);
         w.setDurationMinutes(180);
@@ -64,6 +65,7 @@ public class InMemoryWorkshopService implements WorkshopService {
     @Override
     public void createWorkshop(Workshop workshop) {
         if (workshop != null && workshop.getTitle() != null) {
+            if (workshop.getId() == null) workshop.setId((long) (workshops.size() + 1));
             workshops.put(workshop.getTitle(), workshop);
         }
     }
@@ -73,8 +75,13 @@ public class InMemoryWorkshopService implements WorkshopService {
         createWorkshop(workshop);
     }
 
-    @Override
     public void deleteWorkshop(String title) {
         workshops.remove(title);
+    }
+
+    @Override
+    public void deleteWorkshop(Long id) {
+        if (id == null) return;
+        workshops.values().removeIf(w -> id.equals(w.getId()));
     }
 }

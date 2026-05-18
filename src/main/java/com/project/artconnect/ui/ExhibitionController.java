@@ -83,6 +83,7 @@ public class ExhibitionController {
             return;
         }
         Exhibition edited = new Exhibition();
+        edited.setId(selected.getId());
         edited.setTitle(selected.getTitle());
         edited.setStartDate(selected.getStartDate());
         edited.setEndDate(selected.getEndDate());
@@ -116,7 +117,7 @@ public class ExhibitionController {
         confirm.setHeaderText("Delete exhibition: " + selected.getTitle());
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             try {
-                galleryService.deleteExhibition(selected.getTitle());
+                galleryService.deleteExhibition(selected.getId());
                 refreshData();
             } catch (Exception e) {
                 if (!handleDbError(e)) {
@@ -147,7 +148,9 @@ public class ExhibitionController {
         TextField descField = new TextField(exhibition.getDescription());
         ComboBox<Gallery> galleryBox = new ComboBox<>(FXCollections.observableArrayList(galleryService.getAllGalleries()));
         galleryBox.setPrefWidth(260);
-        if (exhibition.getGallery() != null) galleryBox.setValue(exhibition.getGallery());
+        if (exhibition.getGallery() != null) galleryBox.setValue(galleryService.getAllGalleries().stream()
+                .filter(g -> g.getId() != null && g.getId().equals(exhibition.getGallery().getId()))
+                .findFirst().orElse(exhibition.getGallery()));
         if (editing) titleField.setDisable(true);
 
         GridPane grid = new GridPane();

@@ -88,6 +88,7 @@ public class ArtistController {
             return;
         }
         Artist edited = new Artist();
+        edited.setId(selected.getId());
         edited.setName(selected.getName());
         edited.setBio(selected.getBio());
         edited.setBirthYear(selected.getBirthYear());
@@ -122,7 +123,7 @@ public class ArtistController {
         confirm.setContentText("This action cannot be undone.");
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             try {
-                artistService.deleteArtist(selected.getName());
+                artistService.deleteArtist(selected.getId());
                 refreshTable();
             } catch (Exception e) {
                 showError("Delete artist failed", e.getMessage());

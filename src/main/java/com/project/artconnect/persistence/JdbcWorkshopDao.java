@@ -19,13 +19,14 @@ public class JdbcWorkshopDao implements WorkshopDao {
 
     @Override
     public Optional<Workshop> findById(Long id) {
-        String sql = "SELECT w.title, w.date_time, w.duration_minutes, w.max_participants, w.price, w.location, w.description, w.level, a.name as instructor_name "
+        String sql = "SELECT w.id, w.title, w.date_time, w.duration_minutes, w.max_participants, w.price, w.location, w.description, w.level, a.id as instructor_id, a.name as instructor_name "
                 + "FROM workshop w JOIN artist a ON w.instructor_id = a.id WHERE w.id = ?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Workshop w = new Workshop();
+                    w.setId(rs.getLong("id"));
                     w.setTitle(rs.getString("title"));
                     Timestamp dt = rs.getTimestamp("date_time"); if (dt != null) w.setDate(dt.toLocalDateTime());
                     w.setDurationMinutes(rs.getInt("duration_minutes"));
@@ -34,7 +35,8 @@ public class JdbcWorkshopDao implements WorkshopDao {
                     w.setLocation(rs.getString("location"));
                     w.setDescription(rs.getString("description"));
                     w.setLevel(rs.getString("level"));
-                    String instr = rs.getString("instructor_name"); if (instr != null) { Artist a = new Artist(); a.setName(instr); w.setInstructor(a); }
+                    String instr = rs.getString("instructor_name");
+                    if (instr != null) { Artist a = new Artist(); a.setId(rs.getLong("instructor_id")); a.setName(instr); w.setInstructor(a); }
                     return Optional.of(w);
                 }
             }
@@ -47,11 +49,12 @@ public class JdbcWorkshopDao implements WorkshopDao {
     @Override
     public List<Workshop> findAll() {
         List<Workshop> res = new ArrayList<>();
-        String sql = "SELECT w.title, w.date_time, w.duration_minutes, w.max_participants, w.price, w.location, w.description, w.level, a.name as instructor_name "
+        String sql = "SELECT w.id, w.title, w.date_time, w.duration_minutes, w.max_participants, w.price, w.location, w.description, w.level, a.id as instructor_id, a.name as instructor_name "
                 + "FROM workshop w JOIN artist a ON w.instructor_id = a.id";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Workshop w = new Workshop();
+                w.setId(rs.getLong("id"));
                 w.setTitle(rs.getString("title"));
                 Timestamp dt = rs.getTimestamp("date_time"); if (dt != null) w.setDate(dt.toLocalDateTime());
                 w.setDurationMinutes(rs.getInt("duration_minutes"));
@@ -60,7 +63,7 @@ public class JdbcWorkshopDao implements WorkshopDao {
                 w.setLocation(rs.getString("location"));
                 w.setDescription(rs.getString("description"));
                 w.setLevel(rs.getString("level"));
-                String instr = rs.getString("instructor_name"); if (instr != null) { Artist a = new Artist(); a.setName(instr); w.setInstructor(a); }
+                String instr = rs.getString("instructor_name"); if (instr != null) { Artist a = new Artist(); a.setId(rs.getLong("instructor_id")); a.setName(instr); w.setInstructor(a); }
                 res.add(w);
             }
         } catch (SQLException e) {

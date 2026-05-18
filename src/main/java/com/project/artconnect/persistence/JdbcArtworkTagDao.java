@@ -17,11 +17,12 @@ public class JdbcArtworkTagDao implements ArtworkTagDao {
     @Override
     public List<ArtworkTag> findByArtwork(Artwork artwork) {
         List<ArtworkTag> res = new ArrayList<>();
-        String sqlFind = "SELECT id FROM artwork WHERE title = ? LIMIT 1";
+        if (artwork == null || artwork.getId() == null) return res;
+        String sqlFind = "SELECT id FROM artwork WHERE id = ? LIMIT 1";
         String sqlTags = "SELECT name FROM artwork_tag WHERE artwork_id = ?";
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement psFind = conn.prepareStatement(sqlFind)) {
-            psFind.setString(1, artwork.getTitle());
+            psFind.setLong(1, artwork.getId());
             try (ResultSet rs = psFind.executeQuery()) {
                 if (rs.next()) {
                     long artworkId = rs.getLong(1);
@@ -43,21 +44,15 @@ public class JdbcArtworkTagDao implements ArtworkTagDao {
 
     @Override
     public void save(ArtworkTag tag, Artwork artwork) {
-        String sqlFind = "SELECT id FROM artwork WHERE title = ? LIMIT 1";
         String sqlInsert = "INSERT INTO artwork_tag (artwork_id, name) VALUES (?, ?)";
         try (Connection conn = ConnectionManager.getConnection()) {
             conn.setAutoCommit(false);
-            try (PreparedStatement psFind = conn.prepareStatement(sqlFind)) {
-                psFind.setString(1, artwork.getTitle());
-                try (ResultSet rs = psFind.executeQuery()) {
-                    if (!rs.next()) throw new RuntimeException("Artwork not found: " + artwork.getTitle());
-                    long artworkId = rs.getLong(1);
-                    try (PreparedStatement ps = conn.prepareStatement(sqlInsert)) {
-                        ps.setLong(1, artworkId);
-                        ps.setString(2, tag.getName());
-                        ps.executeUpdate();
-                    }
-                }
+            if (artwork.getId() == null) throw new RuntimeException("Artwork id is required to save artwork tag");
+            try (PreparedStatement ps = conn.prepareStatement(sqlInsert, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+                ps.setLong(1, artwork.getId());
+                ps.setString(2, tag.getName());
+                ps.executeUpdate();
+                try (ResultSet keys = ps.getGeneratedKeys()) { if (keys.next()) tag.setId(keys.getLong(1)); }
             }
             conn.commit();
         } catch (SQLException e) {

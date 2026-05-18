@@ -38,9 +38,13 @@ public class JdbcArtworkService implements ArtworkService {
         artworkDao.update(artwork);
     }
 
-    @Override
     public void deleteArtwork(String title) {
-        artworkDao.delete(title);
+        throw new UnsupportedOperationException("Use deleteArtwork(Long id)");
+    }
+
+    @Override
+    public void deleteArtwork(Long id) {
+        artworkDao.delete(id);
     }
 }
 

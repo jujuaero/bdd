@@ -1,6 +1,7 @@
 package com.project.artconnect.service.impl;
 
 import com.project.artconnect.model.Booking;
+import com.project.artconnect.model.Workshop;
 import com.project.artconnect.persistence.JdbcBookingDao;
 import com.project.artconnect.service.BookingService;
 
@@ -10,8 +11,8 @@ public class JdbcBookingService implements BookingService {
     private final JdbcBookingDao dao = new JdbcBookingDao();
 
     @Override
-    public List<Booking> findByWorkshopTitle(String workshopTitle) {
-        return dao.findByWorkshopTitle(workshopTitle);
+    public List<Booking> findByWorkshop(Workshop workshop) {
+        return dao.findByWorkshop(workshop);
     }
 
     @Override

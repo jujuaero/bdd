@@ -79,6 +79,7 @@ public class CommunityController {
         CommunityMember selected = memberTable.getSelectionModel().getSelectedItem();
         if (selected == null) { showError("No selection", "Please select a member to edit."); return; }
         CommunityMember edited = new CommunityMember();
+        edited.setId(selected.getId());
         edited.setName(selected.getName());
         edited.setEmail(selected.getEmail());
         edited.setBirthYear(selected.getBirthYear());
@@ -100,7 +101,7 @@ public class CommunityController {
         confirm.setTitle("Delete Member");
         confirm.setHeaderText("Delete member: " + selected.getName());
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-            try { communityService.deleteMember(selected.getName()); refreshData(); }
+            try { communityService.deleteMember(selected.getId()); refreshData(); }
             catch (Exception e) { showError("Delete member failed", e.getMessage()); }
         }
     }

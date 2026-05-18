@@ -17,22 +17,26 @@ import java.util.List;
 public class JdbcReviewDao implements ReviewDao {
 
     @Override
-    public List<Review> findByArtworkTitle(String artworkTitle) {
+    public List<Review> findByArtwork(Artwork artwork) {
         List<Review> res = new ArrayList<>();
-        String sql = "SELECT r.rating, r.comment, r.review_date, m.name as reviewer_name, m.email as reviewer_email " +
-                "FROM review r JOIN artwork a ON r.artwork_id = a.id JOIN community_member m ON r.reviewer_id = m.id WHERE a.title = ?";
+        if (artwork == null || artwork.getId() == null) return res;
+        String sql = "SELECT r.id, r.rating, r.comment, r.review_date, m.id as reviewer_id, m.name as reviewer_name, m.email as reviewer_email, a.id as artwork_id " +
+                "FROM review r JOIN artwork a ON r.artwork_id = a.id JOIN community_member m ON r.reviewer_id = m.id WHERE a.id = ?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, artworkTitle);
+            ps.setLong(1, artwork.getId());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     CommunityMember reviewer = new CommunityMember();
+                    reviewer.setId(rs.getLong("reviewer_id"));
                     reviewer.setName(rs.getString("reviewer_name"));
                     reviewer.setEmail(rs.getString("reviewer_email"));
-                    Artwork artwork = new Artwork();
-                    artwork.setTitle(artworkTitle);
+                    Artwork reviewArtwork = new Artwork();
+                    reviewArtwork.setId(rs.getLong("artwork_id"));
+                    reviewArtwork.setTitle(artwork.getTitle());
                     Review r = new Review();
+                    r.setId(rs.getLong("id"));
                     r.setReviewer(reviewer);
-                    r.setArtwork(artwork);
+                    r.setArtwork(reviewArtwork);
                     r.setRating(rs.getInt("rating"));
                     r.setComment(rs.getString("comment"));
                     Date d = rs.getDate("review_date");
@@ -48,34 +52,23 @@ public class JdbcReviewDao implements ReviewDao {
 
     @Override
     public void save(Review review) {
-        String sqlFindMember = "SELECT id FROM community_member WHERE email = ? LIMIT 1";
-        String sqlFindArtwork = "SELECT id FROM artwork WHERE title = ? LIMIT 1";
         String sqlInsert = "INSERT INTO review (reviewer_id, artwork_id, rating, comment, review_date) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = ConnectionManager.getConnection()) {
             conn.setAutoCommit(false);
-            long memberId;
-            try (PreparedStatement psM = conn.prepareStatement(sqlFindMember)) {
-                psM.setString(1, review.getReviewer().getEmail());
-                try (ResultSet rs = psM.executeQuery()) {
-                    if (!rs.next()) throw new RuntimeException("Reviewer not found: " + review.getReviewer().getEmail());
-                    memberId = rs.getLong(1);
-                }
+            if (review.getReviewer() == null || review.getReviewer().getId() == null) {
+                throw new RuntimeException("Reviewer id is required to save review");
             }
-            long artworkId;
-            try (PreparedStatement psA = conn.prepareStatement(sqlFindArtwork)) {
-                psA.setString(1, review.getArtwork().getTitle());
-                try (ResultSet rs = psA.executeQuery()) {
-                    if (!rs.next()) throw new RuntimeException("Artwork not found: " + review.getArtwork().getTitle());
-                    artworkId = rs.getLong(1);
-                }
+            if (review.getArtwork() == null || review.getArtwork().getId() == null) {
+                throw new RuntimeException("Artwork id is required to save review");
             }
-            try (PreparedStatement ps = conn.prepareStatement(sqlInsert)) {
-                ps.setLong(1, memberId);
-                ps.setLong(2, artworkId);
+            try (PreparedStatement ps = conn.prepareStatement(sqlInsert, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+                ps.setLong(1, review.getReviewer().getId());
+                ps.setLong(2, review.getArtwork().getId());
                 ps.setInt(3, review.getRating());
                 ps.setString(4, review.getComment());
                 ps.setDate(5, review.getReviewDate() == null ? Date.valueOf(java.time.LocalDate.now()) : Date.valueOf(review.getReviewDate()));
                 ps.executeUpdate();
+                try (ResultSet keys = ps.getGeneratedKeys()) { if (keys.next()) review.setId(keys.getLong(1)); }
             }
             conn.commit();
         } catch (SQLException e) {

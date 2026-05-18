@@ -41,6 +41,7 @@ public class InMemoryArtistService implements ArtistService {
 
     private void addArtist(String name, String bio, int year, String email, String city, String... disciplineNames) {
         Artist a = new Artist(name, bio, year, email, city);
+        a.setId((long) (artists.size() + 1));
         for (String dName : disciplineNames) {
             if (disciplines.containsKey(dName)) {
                 a.getDisciplines().add(disciplines.get(dName));
@@ -61,6 +62,7 @@ public class InMemoryArtistService implements ArtistService {
 
     @Override
     public void createArtist(Artist artist) {
+        if (artist != null && artist.getId() == null) artist.setId((long) (artists.size() + 1));
         artists.put(artist.getName(), artist);
     }
 
@@ -69,9 +71,14 @@ public class InMemoryArtistService implements ArtistService {
         artists.put(artist.getName(), artist);
     }
 
-    @Override
     public void deleteArtist(String name) {
         artists.remove(name);
+    }
+
+    @Override
+    public void deleteArtist(Long id) {
+        if (id == null) return;
+        artists.values().removeIf(a -> id.equals(a.getId()));
     }
 
     @Override

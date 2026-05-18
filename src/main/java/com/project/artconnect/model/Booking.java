@@ -3,12 +3,21 @@ package com.project.artconnect.model;
 import java.time.LocalDateTime;
 
 public class Booking {
+    private Long id;
     private Workshop workshop;
     private CommunityMember member;
     private LocalDateTime bookingDate;
     private String paymentStatus; // PENDING, PAID, CANCELLED
 
     public Booking() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Booking(Workshop workshop, CommunityMember member) {

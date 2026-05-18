@@ -32,6 +32,7 @@ public class InMemoryArtworkService implements ArtworkService {
         if (artist == null)
             return;
         Artwork a = new Artwork(title, year, type, price, artist);
+        a.setId((long) (artworks.size() + 1));
         a.setMedium("Traditional " + type);
         a.setDimensions("Varies");
         a.setDescription("A legendary masterpiece by " + artist.getName());
@@ -58,6 +59,7 @@ public class InMemoryArtworkService implements ArtworkService {
 
     @Override
     public void createArtwork(Artwork artwork) {
+        if (artwork != null && artwork.getId() == null) artwork.setId((long) (artworks.size() + 1));
         artworks.put(artwork.getTitle(), artwork);
     }
 
@@ -66,8 +68,13 @@ public class InMemoryArtworkService implements ArtworkService {
         artworks.put(artwork.getTitle(), artwork);
     }
 
-    @Override
     public void deleteArtwork(String title) {
         artworks.remove(title);
+    }
+
+    @Override
+    public void deleteArtwork(Long id) {
+        if (id == null) return;
+        artworks.values().removeIf(a -> id.equals(a.getId()));
     }
 }

@@ -37,6 +37,7 @@ public class InMemoryGalleryService implements GalleryService {
 
     private Gallery addGallery(String name, String address, double rating) {
         Gallery g = new Gallery(name, address, rating);
+        g.setId((long) (galleries.size() + 1));
         galleries.put(name, g);
         return g;
     }
@@ -44,6 +45,7 @@ public class InMemoryGalleryService implements GalleryService {
     private void addExhibition(String title, LocalDate start, LocalDate end, Gallery gallery, String curator,
             String theme, Artwork... artworks) {
         Exhibition e = new Exhibition(title, start, end, gallery);
+        e.setId((long) (getAllExhibitions().size() + 1));
         e.setCuratorName(curator);
         e.setTheme(theme);
         for (Artwork a : artworks) {
@@ -82,6 +84,7 @@ public class InMemoryGalleryService implements GalleryService {
     @Override
     public void createGallery(Gallery gallery) {
         if (gallery != null && gallery.getName() != null) {
+            if (gallery.getId() == null) gallery.setId((long) (galleries.size() + 1));
             galleries.put(gallery.getName(), gallery);
         }
     }
@@ -91,16 +94,24 @@ public class InMemoryGalleryService implements GalleryService {
         createGallery(gallery);
     }
 
-    @Override
     public void deleteGallery(String name) {
         galleries.remove(name);
     }
 
     @Override
+    public void deleteGallery(Long id) {
+        if (id == null) return;
+        galleries.values().removeIf(g -> id.equals(g.getId()));
+    }
+
+    @Override
     public void createExhibition(Exhibition exhibition) {
-        if (exhibition == null || exhibition.getGallery() == null || exhibition.getGallery().getName() == null) return;
-        Gallery target = galleries.get(exhibition.getGallery().getName());
+        if (exhibition == null || exhibition.getGallery() == null) return;
+        Gallery target = exhibition.getGallery().getId() != null
+                ? galleries.values().stream().filter(g -> exhibition.getGallery().getId().equals(g.getId())).findFirst().orElse(null)
+                : galleries.get(exhibition.getGallery().getName());
         if (target != null) {
+            if (exhibition.getId() == null) exhibition.setId((long) (getAllExhibitions().size() + 1));
             target.getExhibitions().add(exhibition);
             exhibition.setGallery(target);
         }
@@ -109,15 +120,22 @@ public class InMemoryGalleryService implements GalleryService {
     @Override
     public void updateExhibition(Exhibition exhibition) {
         if (exhibition == null) return;
-        deleteExhibition(exhibition.getTitle());
+        deleteExhibition(exhibition.getId() != null ? exhibition.getId() : null);
         createExhibition(exhibition);
     }
 
-    @Override
     public void deleteExhibition(String title) {
         if (title == null) return;
         for (Gallery g : galleries.values()) {
             g.getExhibitions().removeIf(e -> title.equals(e.getTitle()));
+        }
+    }
+
+    @Override
+    public void deleteExhibition(Long id) {
+        if (id == null) return;
+        for (Gallery g : galleries.values()) {
+            g.getExhibitions().removeIf(e -> id.equals(e.getId()));
         }
     }
 }

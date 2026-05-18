@@ -19,5 +19,5 @@ public interface WorkshopService {
 
     void updateWorkshop(Workshop workshop);
 
-    void deleteWorkshop(String title);
+    void deleteWorkshop(Long id);
 }

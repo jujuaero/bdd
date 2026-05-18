@@ -10,7 +10,7 @@ public interface ArtworkDao {
 
     void update(Artwork artwork);
 
-    void delete(String title);
+    void delete(Long id);
 
     List<Artwork> findByArtistName(String artistName);
 }

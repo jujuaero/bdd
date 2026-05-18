@@ -18,11 +18,11 @@ public interface GalleryService {
 
     void updateGallery(Gallery gallery);
 
-    void deleteGallery(String name);
+    void deleteGallery(Long id);
 
     void createExhibition(Exhibition exhibition);
 
     void updateExhibition(Exhibition exhibition);
 
-    void deleteExhibition(String title);
+    void deleteExhibition(Long id);
 }

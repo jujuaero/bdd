@@ -102,6 +102,7 @@ public class WorkshopController {
         Workshop selected = workshopTable.getSelectionModel().getSelectedItem();
         if (selected == null) { showError("No selection", "Please select a workshop to edit."); return; }
         Workshop edited = new Workshop();
+        edited.setId(selected.getId());
         edited.setTitle(selected.getTitle());
         edited.setDate(selected.getDate());
         edited.setDurationMinutes(selected.getDurationMinutes());
@@ -126,7 +127,7 @@ public class WorkshopController {
         confirm.setTitle("Delete Workshop");
         confirm.setHeaderText("Delete workshop: " + selected.getTitle());
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-            try { workshopService.deleteWorkshop(selected.getTitle()); refreshData(); }
+            try { workshopService.deleteWorkshop(selected.getId()); refreshData(); }
             catch (Exception e) { showError("Delete workshop failed", e.getMessage()); }
         }
     }
@@ -148,9 +149,10 @@ public class WorkshopController {
         TextField locationField = new TextField(workshop.getLocation());
         TextField descField = new TextField(workshop.getDescription());
         TextField levelField = new TextField(workshop.getLevel());
-        ComboBox<String> artistBox = new ComboBox<>(FXCollections.observableArrayList(
-                artistService.getAllArtists().stream().map(Artist::getName).toList()));
-        if (workshop.getInstructor() != null) artistBox.setValue(workshop.getInstructor().getName());
+        ComboBox<Artist> artistBox = new ComboBox<>(FXCollections.observableArrayList(artistService.getAllArtists()));
+        if (workshop.getInstructor() != null) artistBox.setValue(artistService.getAllArtists().stream()
+                .filter(a -> a.getId() != null && a.getId().equals(workshop.getInstructor().getId()))
+                .findFirst().orElse(workshop.getInstructor()));
         if (editing) titleField.setDisable(true);
 
         GridPane grid = new GridPane();
@@ -192,8 +194,7 @@ public class WorkshopController {
         workshop.setDurationMinutes(InputValidation.parseRequiredInt(durationField));
         workshop.setMaxParticipants(InputValidation.parseRequiredInt(maxField));
         workshop.setPrice(InputValidation.parseRequiredDouble(priceField));
-        Artist artist = artistService.getArtistByName(artistBox.getValue()).orElse(null);
-        if (artist == null) { showError("Validation", "Selected instructor does not exist."); return false; }
+        Artist artist = artistBox.getValue();
         workshop.setTitle(t);
         workshop.setInstructor(artist);
         workshop.setLocation(locationField.getText());
@@ -216,7 +217,7 @@ public class WorkshopController {
     }
 
     private void updateBookings(Workshop workshop) {
-        bookingsTable.setItems(FXCollections.observableArrayList(bookingService.findByWorkshopTitle(workshop.getTitle())));
+        bookingsTable.setItems(FXCollections.observableArrayList(bookingService.findByWorkshop(workshop)));
     }
 }
 

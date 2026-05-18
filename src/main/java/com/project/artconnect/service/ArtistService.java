@@ -14,7 +14,7 @@ public interface ArtistService {
 
     void updateArtist(Artist artist);
 
-    void deleteArtist(String name);
+    void deleteArtist(Long id);
 
     List<Discipline> getAllDisciplines();
 

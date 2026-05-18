@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Exhibition {
+    private Long id;
     private String title;
     private LocalDate startDate;
     private LocalDate endDate;
@@ -15,6 +16,14 @@ public class Exhibition {
     private List<Artwork> artworks = new ArrayList<>();
 
     public Exhibition() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Exhibition(String title, LocalDate startDate, LocalDate endDate, Gallery gallery) {

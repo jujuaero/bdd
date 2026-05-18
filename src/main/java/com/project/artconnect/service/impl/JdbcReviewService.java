@@ -1,6 +1,7 @@
 package com.project.artconnect.service.impl;
 
 import com.project.artconnect.model.Review;
+import com.project.artconnect.model.Artwork;
 import com.project.artconnect.persistence.JdbcReviewDao;
 import com.project.artconnect.service.ReviewService;
 
@@ -10,8 +11,8 @@ public class JdbcReviewService implements ReviewService {
     private final JdbcReviewDao dao = new JdbcReviewDao();
 
     @Override
-    public List<Review> findByArtworkTitle(String artworkTitle) {
-        return dao.findByArtworkTitle(artworkTitle);
+    public List<Review> findByArtwork(Artwork artwork) {
+        return dao.findByArtwork(artwork);
     }
 
     @Override

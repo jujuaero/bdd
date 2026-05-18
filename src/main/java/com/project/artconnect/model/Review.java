@@ -3,6 +3,7 @@ package com.project.artconnect.model;
 import java.time.LocalDate;
 
 public class Review {
+    private Long id;
     private CommunityMember reviewer;
     private Artwork artwork;
     private int rating; // 1-5
@@ -10,6 +11,14 @@ public class Review {
     private LocalDate reviewDate;
 
     public Review() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Review(CommunityMember reviewer, Artwork artwork, int rating, String comment) {

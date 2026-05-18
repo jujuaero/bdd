@@ -3,6 +3,7 @@ package com.project.artconnect.model;
 import java.time.LocalDateTime;
 
 public class Workshop {
+    private Long id;
     private String title;
     private LocalDateTime date;
     private int durationMinutes;
@@ -14,6 +15,14 @@ public class Workshop {
     private String level; // beginner, intermediate, advanced
 
     public Workshop() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Workshop(String title, LocalDateTime date, Artist instructor, double price) {

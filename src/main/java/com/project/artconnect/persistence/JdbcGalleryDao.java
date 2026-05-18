@@ -16,12 +16,13 @@ public class JdbcGalleryDao implements GalleryDao {
 
     @Override
     public Optional<Gallery> findById(Long id) {
-        String sql = "SELECT name, address, owner_name, opening_hours, contact_phone, rating, website FROM gallery WHERE id = ?";
+        String sql = "SELECT id, name, address, owner_name, opening_hours, contact_phone, rating, website FROM gallery WHERE id = ?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Gallery g = new Gallery();
+                    g.setId(rs.getLong("id"));
                     g.setName(rs.getString("name"));
                     g.setAddress(rs.getString("address"));
                     g.setOwnerName(rs.getString("owner_name"));
@@ -41,10 +42,11 @@ public class JdbcGalleryDao implements GalleryDao {
     @Override
     public List<Gallery> findAll() {
         List<Gallery> res = new ArrayList<>();
-        String sql = "SELECT name, address, owner_name, opening_hours, contact_phone, rating, website FROM gallery";
+        String sql = "SELECT id, name, address, owner_name, opening_hours, contact_phone, rating, website FROM gallery";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Gallery g = new Gallery();
+                g.setId(rs.getLong("id"));
                 g.setName(rs.getString("name"));
                 g.setAddress(rs.getString("address"));
                 g.setOwnerName(rs.getString("owner_name"));

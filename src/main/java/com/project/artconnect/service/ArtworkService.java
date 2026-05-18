@@ -16,5 +16,5 @@ public interface ArtworkService {
 
     void updateArtwork(Artwork artwork);
 
-    void deleteArtwork(String title);
+    void deleteArtwork(Long id);
 }

@@ -17,12 +17,13 @@ public class JdbcCommunityMemberDao implements CommunityMemberDao {
 
     @Override
     public Optional<CommunityMember> findById(Long id) {
-        String sql = "SELECT name, email, birth_year, phone, city, membership_type FROM community_member WHERE id = ?";
+        String sql = "SELECT id, name, email, birth_year, phone, city, membership_type FROM community_member WHERE id = ?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     CommunityMember m = new CommunityMember();
+                    m.setId(rs.getLong("id"));
                     m.setName(rs.getString("name"));
                     m.setEmail(rs.getString("email"));
                     int by = rs.getInt("birth_year"); if (!rs.wasNull()) m.setBirthYear(by);
@@ -46,6 +47,7 @@ public class JdbcCommunityMemberDao implements CommunityMemberDao {
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 CommunityMember m = new CommunityMember();
+                m.setId(rs.getLong("id"));
                 m.setName(rs.getString("name"));
                 m.setEmail(rs.getString("email"));
                 int by = rs.getInt("birth_year"); if (!rs.wasNull()) m.setBirthYear(by);

@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.List;
@@ -21,12 +22,13 @@ public class JdbcArtistDao implements ArtistDao {
     @Override
     public List<Artist> findAll() {
         List<Artist> result = new ArrayList<>();
-        String sql = "SELECT name, bio, birth_year, contact_email, phone, city, website, social_media, is_active FROM artist";
+        String sql = "SELECT id, name, bio, birth_year, contact_email, phone, city, website, social_media, is_active FROM artist";
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Artist a = new Artist();
+                a.setId(rs.getLong("id"));
                 a.setName(rs.getString("name"));
                 a.setBio(rs.getString("bio"));
                 int by = rs.getInt("birth_year");
@@ -48,7 +50,7 @@ public class JdbcArtistDao implements ArtistDao {
     @Override
     public void save(Artist artist) {
         String sql = "INSERT INTO artist (name, bio, birth_year, contact_email, phone, city, website, social_media, is_active) VALUES (?,?,?,?,?,?,?,?,?)";
-        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, artist.getName());
             ps.setString(2, artist.getBio());
             if (artist.getBirthYear() != null) ps.setInt(3, artist.getBirthYear()); else ps.setNull(3, java.sql.Types.INTEGER);
@@ -59,6 +61,9 @@ public class JdbcArtistDao implements ArtistDao {
             ps.setString(8, artist.getSocialMedia());
             ps.setBoolean(9, artist.isActive());
             ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) artist.setId(keys.getLong(1));
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Error saving artist", e);
         }
@@ -66,17 +71,18 @@ public class JdbcArtistDao implements ArtistDao {
 
     @Override
     public void update(Artist artist) {
-        String sql = "UPDATE artist SET bio=?, birth_year=?, contact_email=?, phone=?, city=?, website=?, social_media=?, is_active=? WHERE name=?";
+        String sql = "UPDATE artist SET name=?, bio=?, birth_year=?, contact_email=?, phone=?, city=?, website=?, social_media=?, is_active=? WHERE id=?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, artist.getBio());
-            if (artist.getBirthYear() != null) ps.setInt(2, artist.getBirthYear()); else ps.setNull(2, java.sql.Types.INTEGER);
-            ps.setString(3, artist.getContactEmail());
-            ps.setString(4, artist.getPhone());
-            ps.setString(5, artist.getCity());
-            ps.setString(6, artist.getWebsite());
-            ps.setString(7, artist.getSocialMedia());
-            ps.setBoolean(8, artist.isActive());
-            ps.setString(9, artist.getName());
+            ps.setString(1, artist.getName());
+            ps.setString(2, artist.getBio());
+            if (artist.getBirthYear() != null) ps.setInt(3, artist.getBirthYear()); else ps.setNull(3, java.sql.Types.INTEGER);
+            ps.setString(4, artist.getContactEmail());
+            ps.setString(5, artist.getPhone());
+            ps.setString(6, artist.getCity());
+            ps.setString(7, artist.getWebsite());
+            ps.setString(8, artist.getSocialMedia());
+            ps.setBoolean(9, artist.isActive());
+            ps.setLong(10, artist.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error updating artist", e);
@@ -84,10 +90,10 @@ public class JdbcArtistDao implements ArtistDao {
     }
 
     @Override
-    public void delete(String artistName) {
-        String sql = "DELETE FROM artist WHERE name = ?";
+    public void delete(Long id) {
+        String sql = "DELETE FROM artist WHERE id = ?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, artistName);
+            ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error deleting artist", e);
@@ -97,12 +103,13 @@ public class JdbcArtistDao implements ArtistDao {
     @Override
     public List<Artist> findByCity(String city) {
         List<Artist> result = new ArrayList<>();
-        String sql = "SELECT name, bio, birth_year, contact_email, phone, city, website, social_media, is_active FROM artist WHERE city = ?";
+        String sql = "SELECT id, name, bio, birth_year, contact_email, phone, city, website, social_media, is_active FROM artist WHERE city = ?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, city);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Artist a = new Artist();
+                    a.setId(rs.getLong("id"));
                     a.setName(rs.getString("name"));
                     a.setBio(rs.getString("bio"));
                     int by = rs.getInt("birth_year");

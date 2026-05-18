@@ -42,14 +42,15 @@ public class JdbcGalleryService implements GalleryService {
 
     @Override
     public List<Exhibition> getExhibitionsByGallery(Gallery gallery) {
-        if (gallery == null) return Collections.emptyList();
+        if (gallery == null || gallery.getId() == null) return Collections.emptyList();
         List<Exhibition> res = new ArrayList<>();
-        String sql = "SELECT title, start_date, end_date, description, curator_name, theme FROM exhibition WHERE gallery_id = (SELECT id FROM gallery WHERE name = ?)";
+        String sql = "SELECT id, title, start_date, end_date, description, curator_name, theme FROM exhibition WHERE gallery_id = ?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, gallery.getName());
+            ps.setLong(1, gallery.getId());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Exhibition ex = new Exhibition();
+                    ex.setId(rs.getLong("id"));
                     ex.setTitle(rs.getString("title"));
                     Date sd = rs.getDate("start_date"); if (sd != null) ex.setStartDate(sd.toLocalDate());
                     Date ed = rs.getDate("end_date"); if (ed != null) ex.setEndDate(ed.toLocalDate());
@@ -69,7 +70,7 @@ public class JdbcGalleryService implements GalleryService {
     @Override
     public void createGallery(Gallery gallery) {
         String sql = "INSERT INTO gallery (name, address, owner_name, opening_hours, contact_phone, rating, website) VALUES (?,?,?,?,?,?,?)";
-        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, gallery.getName());
             ps.setString(2, gallery.getAddress());
             ps.setString(3, gallery.getOwnerName());
@@ -78,6 +79,7 @@ public class JdbcGalleryService implements GalleryService {
             if (gallery.getRating() == 0.0) ps.setNull(6, java.sql.Types.DECIMAL); else ps.setDouble(6, gallery.getRating());
             ps.setString(7, gallery.getWebsite());
             ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) { if (keys.next()) gallery.setId(keys.getLong(1)); }
         } catch (SQLException e) {
             throw new RuntimeException("Error saving gallery", e);
         }
@@ -85,15 +87,16 @@ public class JdbcGalleryService implements GalleryService {
 
     @Override
     public void updateGallery(Gallery gallery) {
-        String sql = "UPDATE gallery SET address=?, owner_name=?, opening_hours=?, contact_phone=?, rating=?, website=? WHERE name=?";
+        String sql = "UPDATE gallery SET name=?, address=?, owner_name=?, opening_hours=?, contact_phone=?, rating=?, website=? WHERE id=?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, gallery.getAddress());
-            ps.setString(2, gallery.getOwnerName());
-            ps.setString(3, gallery.getOpeningHours());
-            ps.setString(4, gallery.getContactPhone());
-            if (gallery.getRating() == 0.0) ps.setNull(5, java.sql.Types.DECIMAL); else ps.setDouble(5, gallery.getRating());
-            ps.setString(6, gallery.getWebsite());
-            ps.setString(7, gallery.getName());
+            ps.setString(1, gallery.getName());
+            ps.setString(2, gallery.getAddress());
+            ps.setString(3, gallery.getOwnerName());
+            ps.setString(4, gallery.getOpeningHours());
+            ps.setString(5, gallery.getContactPhone());
+            if (gallery.getRating() == 0.0) ps.setNull(6, java.sql.Types.DECIMAL); else ps.setDouble(6, gallery.getRating());
+            ps.setString(7, gallery.getWebsite());
+            ps.setLong(8, gallery.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error updating gallery", e);
@@ -101,10 +104,10 @@ public class JdbcGalleryService implements GalleryService {
     }
 
     @Override
-    public void deleteGallery(String name) {
-        String sql = "DELETE FROM gallery WHERE name = ?";
+    public void deleteGallery(Long id) {
+        String sql = "DELETE FROM gallery WHERE id = ?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, name);
+            ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error deleting gallery", e);
@@ -113,9 +116,12 @@ public class JdbcGalleryService implements GalleryService {
 
     @Override
     public void createExhibition(Exhibition exhibition) {
-        String sql = "INSERT INTO exhibition (gallery_id, title, start_date, end_date, description, curator_name, theme) VALUES ((SELECT id FROM gallery WHERE name=?),?,?,?,?,?,?)";
-        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, exhibition.getGallery() != null ? exhibition.getGallery().getName() : null);
+        String sql = "INSERT INTO exhibition (gallery_id, title, start_date, end_date, description, curator_name, theme) VALUES (?,?,?,?,?,?,?)";
+        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+            if (exhibition.getGallery() == null || exhibition.getGallery().getId() == null) {
+                throw new RuntimeException("Gallery id is required to save exhibition");
+            }
+            ps.setLong(1, exhibition.getGallery().getId());
             ps.setString(2, exhibition.getTitle());
             ps.setDate(3, exhibition.getStartDate() != null ? java.sql.Date.valueOf(exhibition.getStartDate()) : null);
             ps.setDate(4, exhibition.getEndDate() != null ? java.sql.Date.valueOf(exhibition.getEndDate()) : null);
@@ -123,6 +129,7 @@ public class JdbcGalleryService implements GalleryService {
             ps.setString(6, exhibition.getCuratorName());
             ps.setString(7, exhibition.getTheme());
             ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) { if (keys.next()) exhibition.setId(keys.getLong(1)); }
             com.project.artconnect.util.TriggerAlertService.showPendingAlerts();
         } catch (SQLException e) {
             throw new RuntimeException("Error saving exhibition", e);
@@ -131,15 +138,18 @@ public class JdbcGalleryService implements GalleryService {
 
     @Override
     public void updateExhibition(Exhibition exhibition) {
-        String sql = "UPDATE exhibition SET gallery_id=(SELECT id FROM gallery WHERE name=?), start_date=?, end_date=?, description=?, curator_name=?, theme=? WHERE title=?";
+        String sql = "UPDATE exhibition SET gallery_id=?, start_date=?, end_date=?, description=?, curator_name=?, theme=? WHERE id=?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, exhibition.getGallery() != null ? exhibition.getGallery().getName() : null);
+            if (exhibition.getGallery() == null || exhibition.getGallery().getId() == null || exhibition.getId() == null) {
+                throw new RuntimeException("Exhibition and gallery ids are required to update exhibition");
+            }
+            ps.setLong(1, exhibition.getGallery().getId());
             ps.setDate(2, exhibition.getStartDate() != null ? java.sql.Date.valueOf(exhibition.getStartDate()) : null);
             ps.setDate(3, exhibition.getEndDate() != null ? java.sql.Date.valueOf(exhibition.getEndDate()) : null);
             ps.setString(4, exhibition.getDescription());
             ps.setString(5, exhibition.getCuratorName());
             ps.setString(6, exhibition.getTheme());
-            ps.setString(7, exhibition.getTitle());
+            ps.setLong(7, exhibition.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error updating exhibition", e);
@@ -147,10 +157,10 @@ public class JdbcGalleryService implements GalleryService {
     }
 
     @Override
-    public void deleteExhibition(String title) {
-        String sql = "DELETE FROM exhibition WHERE title = ?";
+    public void deleteExhibition(Long id) {
+        String sql = "DELETE FROM exhibition WHERE id = ?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, title);
+            ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error deleting exhibition", e);

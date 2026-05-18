@@ -25,6 +25,7 @@ public class InMemoryCommunityService implements CommunityService {
 
     private CommunityMember addMember(String name, String email, String city) {
         CommunityMember m = new CommunityMember(name, email);
+        m.setId((long) (members.size() + 1));
         m.setCity(city);
         m.setMembershipType("Premium");
         members.put(name, m);
@@ -58,6 +59,7 @@ public class InMemoryCommunityService implements CommunityService {
     @Override
     public void createMember(CommunityMember member) {
         if (member != null && member.getName() != null) {
+            if (member.getId() == null) member.setId((long) (members.size() + 1));
             members.put(member.getName(), member);
         }
     }
@@ -67,8 +69,13 @@ public class InMemoryCommunityService implements CommunityService {
         createMember(member);
     }
 
-    @Override
     public void deleteMember(String name) {
         members.remove(name);
+    }
+
+    @Override
+    public void deleteMember(Long id) {
+        if (id == null) return;
+        members.values().removeIf(m -> id.equals(m.getId()));
     }
 }

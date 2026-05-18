@@ -13,7 +13,7 @@ public interface ArtistDao {
 
     void update(Artist artist);
 
-    void delete(String artistName);
+    void delete(Long id);
 
     List<Artist> findByCity(String city);
 }

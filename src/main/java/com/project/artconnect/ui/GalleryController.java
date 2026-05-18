@@ -71,6 +71,7 @@ public class GalleryController {
             return;
         }
         Gallery edited = new Gallery();
+        edited.setId(selected.getId());
         edited.setName(selected.getName());
         edited.setAddress(selected.getAddress());
         edited.setOwnerName(selected.getOwnerName());
@@ -101,7 +102,7 @@ public class GalleryController {
         confirm.setHeaderText("Delete gallery: " + selected.getName());
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             try {
-                galleryService.deleteGallery(selected.getName());
+                galleryService.deleteGallery(selected.getId());
                 refreshData();
             } catch (Exception e) {
                 showError("Delete gallery failed", e.getMessage());

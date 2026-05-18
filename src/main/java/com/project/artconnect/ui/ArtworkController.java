@@ -121,6 +121,7 @@ public class ArtworkController {
             return;
         }
         Artwork edited = new Artwork();
+        edited.setId(selected.getId());
         edited.setTitle(selected.getTitle());
         edited.setCreationYear(selected.getCreationYear());
         edited.setType(selected.getType());
@@ -155,7 +156,7 @@ public class ArtworkController {
         confirm.setContentText("This action cannot be undone.");
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             try {
-                artworkService.deleteArtwork(selected.getTitle());
+                artworkService.deleteArtwork(selected.getId());
                 refreshTable();
             } catch (Exception e) {
                 showError("Delete artwork failed", e.getMessage());
@@ -174,11 +175,11 @@ public class ArtworkController {
         ComboBox<Artwork.Status> statusBox = new ComboBox<>(FXCollections.observableArrayList(Artwork.Status.values()));
         statusBox.setValue(artwork.getStatus() == null ? Artwork.Status.FOR_SALE : artwork.getStatus());
 
-        ComboBox<String> artistBox = new ComboBox<>();
-        artistBox.setItems(FXCollections.observableArrayList(
-                artistService.getAllArtists().stream().map(Artist::getName).toList()));
+        ComboBox<Artist> artistBox = new ComboBox<>(FXCollections.observableArrayList(artistService.getAllArtists()));
         if (artwork.getArtist() != null) {
-            artistBox.setValue(artwork.getArtist().getName());
+            artistBox.setValue(artistService.getAllArtists().stream()
+                    .filter(a -> a.getId() != null && a.getId().equals(artwork.getArtist().getId()))
+                    .findFirst().orElse(artwork.getArtist()));
         }
 
         if (artwork.getTitle() != null && !artwork.getTitle().isBlank()) {
@@ -212,18 +213,13 @@ public class ArtworkController {
         }
 
         String t = titleField.getText() == null ? "" : titleField.getText().trim();
-        String aName = artistBox.getValue();
-        if (t.isEmpty() || aName == null || aName.isBlank()) {
+        Artist artist = artistBox.getValue();
+        if (t.isEmpty() || artist == null) {
             showError("Validation", "Title and Artist are required.");
             return false;
         }
         double price = InputValidation.parseRequiredDouble(priceField);
 
-        Artist artist = artistService.getArtistByName(aName).orElse(null);
-        if (artist == null) {
-            showError("Validation", "Selected artist does not exist.");
-            return false;
-        }
 
         artwork.setTitle(t);
         artwork.setArtist(artist);
@@ -252,7 +248,7 @@ public class ArtworkController {
         tagsTable.setItems(FXCollections.observableArrayList(tagService.getTagsFor(artwork)));
 
         // Load reviews for selected artwork
-        reviewsTable.setItems(FXCollections.observableArrayList(reviewService.findByArtworkTitle(artwork.getTitle())));
+        reviewsTable.setItems(FXCollections.observableArrayList(reviewService.findByArtwork(artwork)));
     }
 }
 
