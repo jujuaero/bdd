@@ -1,0 +1,30 @@
+@startuml Booking_Class_Diagram
+skinparam backgroundColor #F5F5F5
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #333333
+skinparam classArrowColor #333333
+skinparam classAttributeIconSize 0
+
+class Booking {
+    - workshop: Workshop
+    - member: CommunityMember
+    - bookingDate: LocalDateTime
+    - paymentStatus: String
+    ---
+    + Booking()
+    + Booking(workshop, member)
+    + getWorkshop(): Workshop
+    + setWorkshop(workshop): void
+    + getMember(): CommunityMember
+    + setMember(member): void
+    + getBookingDate(): LocalDateTime
+    + setBookingDate(bookingDate): void
+    + getPaymentStatus(): String
+    + setPaymentStatus(paymentStatus): void
+}
+
+Booking --> Workshop : books
+Booking --> CommunityMember : created by
+
+@enduml
+

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="12.0" styleClass="tab-content" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.project.artconnect.ui.DiscoverController">
+    <padding>
+        <Insets bottom="14.0" left="16.0" right="16.0" top="14.0" />
+    </padding>
+    <Label text="Featured Exhibitions &amp; Content" styleClass="section-title"/>
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+        <FlowPane fx:id="discoverPane" hgap="20" vgap="20" prefWrapLength="1100">
+            <!-- Cards added programmatically -->
+        </FlowPane>
+    </ScrollPane>
+</VBox>

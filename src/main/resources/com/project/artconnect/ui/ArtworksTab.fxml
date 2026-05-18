@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="12.0" styleClass="tab-content" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.project.artconnect.ui.ArtworkController">
+    <padding>
+        <Insets bottom="14.0" left="16.0" right="16.0" top="14.0" />
+    </padding>
+    <Label text="Artworks" styleClass="section-title"/>
+    <HBox fx:id="crudToolbar" spacing="10.0" alignment="CENTER_LEFT">
+        <Button text="Add" onAction="#handleAddArtwork" />
+        <Button text="Edit" onAction="#handleEditArtwork" styleClass="secondary" />
+        <Button text="Delete" onAction="#handleDeleteArtwork" styleClass="danger" />
+        <Button text="Refresh" onAction="#handleRefresh" styleClass="secondary" />
+    </HBox>
+    <TableView fx:id="artworkTable" VBox.vgrow="ALWAYS" prefHeight="300">
+        <columns>
+            <TableColumn fx:id="titleColumn" text="Title" prefWidth="200" />
+            <TableColumn fx:id="artistColumn" text="Artist" prefWidth="150" />
+            <TableColumn fx:id="typeColumn" text="Type" prefWidth="100" />
+            <TableColumn fx:id="priceColumn" text="Price" prefWidth="100" />
+            <TableColumn fx:id="statusColumn" text="Status" prefWidth="150" />
+        </columns>
+    </TableView>
+    <Separator />
+    <Label text="Tags for Selected Artwork" styleClass="subsection-title"/>
+    <TableView fx:id="tagsTable" prefHeight="150">
+        <columns>
+            <TableColumn fx:id="tagNameColumn" text="Tag Name" prefWidth="300" />
+        </columns>
+    </TableView>
+    <Separator />
+    <Label text="Reviews for Selected Artwork" styleClass="subsection-title"/>
+    <TableView fx:id="reviewsTable" prefHeight="150">
+        <columns>
+            <TableColumn fx:id="reviewerColumn" text="Reviewer" prefWidth="150" />
+            <TableColumn fx:id="ratingColumn" text="Rating" prefWidth="80" />
+            <TableColumn fx:id="commentColumn" text="Comment" prefWidth="300" />
+        </columns>
+    </TableView>
+</VBox>

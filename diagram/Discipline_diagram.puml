@@ -1,0 +1,19 @@
+@startuml Discipline_Class_Diagram
+skinparam backgroundColor #F5F5F5
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #333333
+skinparam classArrowColor #333333
+skinparam classAttributeIconSize 0
+
+class Discipline {
+    - name: String
+    ---
+    + Discipline()
+    + Discipline(name)
+    + getName(): String
+    + setName(name): void
+    + toString(): String
+}
+
+@enduml
+

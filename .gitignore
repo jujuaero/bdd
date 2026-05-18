@@ -1,0 +1,16 @@
+# Maven build output
+/target/
+
+# IDE files
+/.idea/
+*.iml
+/out/
+
+# OS artifacts
+.DS_Store
+__MACOSX/
+
+
+/src/main/java/com/project/artconnect/config/DatabaseConfig.java
+/src/main/resources/database.properties
+/src/main/java/com/project/artconnect/util/DatabaseConfig.java

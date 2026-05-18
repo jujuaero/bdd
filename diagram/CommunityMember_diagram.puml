@@ -1,0 +1,48 @@
+@startuml CommunityMember_Class_Diagram
+skinparam backgroundColor #F5F5F5
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #333333
+skinparam classArrowColor #333333
+skinparam classAttributeIconSize 0
+
+class CommunityMember {
+    - name: String
+    - email: String
+    - birthYear: Integer
+    - phone: String
+    - city: String
+    - favoriteDisciplines: List<Discipline>
+    - membershipType: String
+    - bookings: List<Booking>
+    - reviews: List<Review>
+    ---
+    + CommunityMember()
+    + CommunityMember(name, email)
+    + getName(): String
+    + setName(name): void
+    + getEmail(): String
+    + setEmail(email): void
+    + getBirthYear(): Integer
+    + setBirthYear(birthYear): void
+    + getPhone(): String
+    + setPhone(phone): void
+    + getCity(): String
+    + setCity(city): void
+    + getFavoriteDisciplines(): List<Discipline>
+    + setFavoriteDisciplines(favoriteDisciplines): void
+    + getMembershipType(): String
+    + setMembershipType(membershipType): void
+    + getBookings(): List<Booking>
+    + setBookings(bookings): void
+    + getReviews(): List<Review>
+    + setReviews(reviews): void
+    + addBooking(booking): void
+    + toString(): String
+}
+
+CommunityMember --> Discipline : has favorites
+CommunityMember --> Booking : makes
+CommunityMember --> Review : writes
+
+@enduml
+

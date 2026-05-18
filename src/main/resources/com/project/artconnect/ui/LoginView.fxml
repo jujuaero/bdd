@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="14" alignment="CENTER" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.project.artconnect.ui.LoginController" prefWidth="420" prefHeight="310">
+    <padding>
+        <Insets top="24" right="28" bottom="24" left="28"/>
+    </padding>
+    <Label text="Connexion ArtConnect" styleClass="section-title"/>
+    <Label text="Choisissez votre rôle pour cette session." wrapText="true"/>
+    <Label text="Rôle :"/>
+    <ComboBox fx:id="roleCombo" prefWidth="360" maxWidth="Infinity"/>
+    <Label fx:id="emailLabel" text="E-mail membre (utilisateur) :"/>
+    <TextField fx:id="emailField" promptText="vous@exemple.com" prefWidth="360"/>
+    <Label text="Visiteur : consultation seule · Utilisateur : inscription communauté · Admin : tout modifier"
+           wrapText="true" style="-fx-text-fill: #475569; -fx-font-size: 11px;"/>
+</VBox>

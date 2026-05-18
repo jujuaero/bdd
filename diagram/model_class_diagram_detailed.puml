@@ -1,0 +1,271 @@
+@startuml ArtConnect_Model_Detailed
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam classBackgroundColor #E3F2FD
+skinparam classBorderColor #1976D2
+skinparam classArrowColor #1565C0
+skinparam classAttributeIconSize 0
+skinparam arrowThickness 1.5
+skinparam linetype ortho
+skinparam ranksep 40
+skinparam nodesep 20
+
+' ============= VALUE OBJECTS =============
+class Discipline <<ValueObject>> #FFF3E0 {
+    **- name : String**
+    --
+    + Discipline()
+    + Discipline(name: String)
+    + getName(): String
+    + setName(name: String): void
+    + toString(): String
+}
+
+class ArtworkTag <<ValueObject>> #FFF3E0 {
+    **- name : String**
+    --
+    + ArtworkTag()
+    + ArtworkTag(name: String)
+    + getName(): String
+    + setName(name: String): void
+    + toString(): String
+}
+
+' ============= ENUMS =============
+enum Status #FFECB3 {
+    FOR_SALE
+    SOLD
+    EXHIBITED
+}
+
+' ============= CORE DOMAIN ENTITIES =============
+
+class Artist <<Entity>> #BBDEFB {
+    **- name : String**
+    - bio : String
+    - birthYear : Integer
+    - disciplines : List<Discipline>
+    - contactEmail : String
+    - phone : String
+    - city : String
+    - website : String
+    - socialMedia : String
+    - isActive : boolean
+    - artworks : List<Artwork>
+    --
+    + Artist()
+    + Artist(name, bio, birthYear, contactEmail, city)
+    + {getter/setter} ...
+    + addArtwork(artwork): void
+    + toString(): String
+}
+
+class Artwork <<Entity>> #BBDEFB {
+    **- title : String**
+    - creationYear : Integer
+    - type : String
+    - medium : String
+    - dimensions : String
+    - description : String
+    - price : double
+    - status : Status
+    - artist : Artist
+    - tags : List<ArtworkTag>
+    --
+    + Artwork()
+    + Artwork(title, creationYear, type, price, artist)
+    + {getter/setter} ...
+    + toString(): String
+}
+
+class Gallery <<Entity>> #BBDEFB {
+    **- name : String**
+    - address : String
+    - ownerName : String
+    - openingHours : String
+    - contactPhone : String
+    - rating : double
+    - website : String
+    - exhibitions : List<Exhibition>
+    --
+    + Gallery()
+    + Gallery(name, address, rating)
+    + {getter/setter} ...
+    + addExhibition(exhibition): void
+    + toString(): String
+}
+
+class Exhibition <<Entity>> #BBDEFB {
+    **- title : String**
+    - startDate : LocalDate
+    - endDate : LocalDate
+    - description : String
+    - gallery : Gallery
+    - curatorName : String
+    - theme : String
+    - artworks : List<Artwork>
+    --
+    + Exhibition()
+    + Exhibition(title, startDate, endDate, gallery)
+    + {getter/setter} ...
+    + toString(): String
+}
+
+class Workshop <<Entity>> #BBDEFB {
+    **- title : String**
+    - date : LocalDateTime
+    - durationMinutes : int
+    - maxParticipants : int
+    - price : double
+    - instructor : Artist
+    - location : String
+    - description : String
+    - level : String
+    --
+    + Workshop()
+    + Workshop(title, date, instructor, price)
+    + {getter/setter} ...
+    + toString(): String
+}
+
+class CommunityMember <<Entity>> #C8E6C9 {
+    **- name : String**
+    - email : String
+    - birthYear : Integer
+    - phone : String
+    - city : String
+    - favoriteDisciplines : List<Discipline>
+    - membershipType : String
+    - bookings : List<Booking>
+    - reviews : List<Review>
+    --
+    + CommunityMember()
+    + CommunityMember(name, email)
+    + {getter/setter} ...
+    + addBooking(booking): void
+    + toString(): String
+}
+
+' ============= ASSOCIATION ENTITIES (Junction/Bridge Classes) =============
+
+class Booking <<AssociationEntity>> #F8BBD0 {
+    - workshop : Workshop
+    - member : CommunityMember
+    - bookingDate : LocalDateTime
+    - paymentStatus : String
+    --
+    + Booking()
+    + Booking(workshop, member)
+    + {getter/setter} ...
+}
+
+class Review <<AssociationEntity>> #F8BBD0 {
+    - reviewer : CommunityMember
+    - artwork : Artwork
+    - rating : int
+    - comment : String
+    - reviewDate : LocalDate
+    --
+    + Review()
+    + Review(reviewer, artwork, rating, comment)
+    + {getter/setter} ...
+}
+
+' ============= RELATIONSHIPS =============
+
+Artwork --> Status : **status** : Status
+
+Artist "1" --> "*" Discipline : **disciplines**\n1..*
+
+Artist "1" <|-- "*" Artwork : **artist**\n*..1\n(bidirectional)
+
+Artwork "1" --> "*" ArtworkTag : **tags**\n0..*
+
+Gallery "1" <|-- "*" Exhibition : **gallery**\n*..1\n(bidirectional)
+
+Exhibition "*" --> "*" Artwork : **artworks**\n0..*
+
+Workshop "*" --> "1" Artist : **instructor**\n*..1
+
+CommunityMember "1" --> "*" Discipline : **favoriteDisciplines**\n0..*
+
+CommunityMember "1" <|-- "*" Booking : **member**\n*..1\n(bidirectional)
+
+Booking "*" --> "1" Workshop : **workshop**\n*..1
+
+CommunityMember "1" <|-- "*" Review : **reviewer**\n*..1\n(bidirectional)
+
+Review "*" --> "1" Artwork : **artwork**\n*..1
+
+' ============= NOTES & LEGEND =============
+
+note bottom of Discipline
+  Catégories d'art:
+  Painting, Sculpture,
+  Photography, Digital Art,
+  Music, etc.
+end note
+
+note bottom of Status
+  États d'une œuvre :
+  - FOR_SALE : disponible
+  - SOLD : vendue
+  - EXHIBITED : exposée
+end note
+
+note right of Artist
+  **Créateur dans la communauté**
+  - Possède 0..* artworks (bidirectionnel)
+  - Peut instruire des workshops
+  - Associé à plusieurs disciplines
+  - État: actif/inactif
+end note
+
+note right of Artwork
+  **Pièce créée par un artiste**
+  - Possédé par exactement 1 Artist
+  - Peut être dans 0..* Exhibitions
+  - Peut recevoir 0..* Reviews
+  - Statut: FOR_SALE | SOLD | EXHIBITED
+end note
+
+note right of Gallery
+  **Lieu d'exposition d'art**
+  - Organise 0..* Exhibitions
+  - Évaluée par un rating
+  - Possède des coordonnées
+end note
+
+note right of CommunityMember
+  **Visiteur/Participant communauté**
+  - Peut réserver des Workshops
+  - Peut laisser des Reviews
+  - Dispose de disciplines favorites
+  - Types : free, premium
+end note
+
+note right of Booking
+  **Réservation d'un workshop**
+  - Relie CommunityMember ↔ Workshop
+  - Statuts de paiement:
+    PENDING | PAID | CANCELLED
+end note
+
+note right of Review
+  **Avis sur une œuvre**
+  - Relie CommunityMember ↔ Artwork
+  - Rating: 1-5
+  - Inclut commentaire et date
+end note
+
+legend bottom left
+    |<#BBDEFB> Entity (classe métier principale) |
+    |<#C8E6C9> Entity Communauté |
+    |<#F8BBD0> Association Entity (classe jonction) |
+    |<#FFF3E0> ValueObject (concept léger) |
+    |<#FFECB3> Enumération |
+    |<#E8F5E9> Relations : * = 0..*, 1 = exactement 1 |
+end legend
+
+@enduml
+

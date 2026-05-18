@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="12.0" styleClass="tab-content" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.project.artconnect.ui.WorkshopController">
+    <padding>
+        <Insets bottom="14.0" left="16.0" right="16.0" top="14.0" />
+    </padding>
+    <Label text="Workshops" styleClass="section-title"/>
+    <HBox fx:id="crudToolbar" spacing="10.0" alignment="CENTER_LEFT">
+        <Button text="Add" onAction="#handleAddWorkshop" />
+        <Button text="Edit" onAction="#handleEditWorkshop" styleClass="secondary" />
+        <Button text="Delete" onAction="#handleDeleteWorkshop" styleClass="danger" />
+        <Button text="Refresh" onAction="#handleRefresh" styleClass="secondary" />
+    </HBox>
+    <TableView fx:id="workshopTable" VBox.vgrow="ALWAYS" prefHeight="300">
+        <columns>
+            <TableColumn fx:id="titleColumn" text="Title" prefWidth="200" />
+            <TableColumn fx:id="instructorColumn" text="Instructor" prefWidth="150" />
+            <TableColumn fx:id="dateColumn" text="Date" prefWidth="150" />
+            <TableColumn fx:id="priceColumn" text="Price" prefWidth="80" />
+            <TableColumn fx:id="levelColumn" text="Level" prefWidth="100" />
+        </columns>
+    </TableView>
+    <Separator />
+    <Label text="Bookings for Selected Workshop" styleClass="subsection-title"/>
+    <TableView fx:id="bookingsTable" prefHeight="150">
+        <columns>
+            <TableColumn fx:id="memberNameColumn" text="Member" prefWidth="200" />
+            <TableColumn fx:id="bookingDateColumn" text="Booking Date" prefWidth="200" />
+            <TableColumn fx:id="paymentStatusColumn" text="Payment Status" prefWidth="150" />
+        </columns>
+    </TableView>
+</VBox>
