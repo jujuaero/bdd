@@ -18,21 +18,27 @@ public final class Permissions {
     public static boolean canCreate(Resource resource) {
         return switch (AuthSession.get().getRole()) {
             case ADMIN -> true;
-            case ARTIST -> resource == Resource.EXHIBITIONS;
+            case ORGANIZER -> resource == Resource.EXHIBITIONS || resource == Resource.WORKSHOPS;
             case VISITOR -> false;
+            case MEMBER -> false;
         };
     }
 
     public static boolean canUpdate(Resource resource) {
         return switch (AuthSession.get().getRole()) {
             case ADMIN -> true;
-            case ARTIST -> resource == Resource.COMMUNITY || resource == Resource.EXHIBITIONS;
+            case ORGANIZER -> resource == Resource.EXHIBITIONS || resource == Resource.WORKSHOPS;
+            case MEMBER -> resource == Resource.COMMUNITY;
             case VISITOR -> false;
         };
     }
 
     public static boolean canDelete(Resource resource) {
-        return AuthSession.get().getRole() == UserRole.ADMIN;
+        return switch (AuthSession.get().getRole()) {
+            case ADMIN -> true;
+            case ORGANIZER -> resource == Resource.EXHIBITIONS || resource == Resource.WORKSHOPS;
+            case MEMBER, VISITOR -> false;
+        };
     }
 
     public static boolean requiresAdmin(Resource resource) {

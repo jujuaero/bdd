@@ -63,9 +63,11 @@ public final class UiPermissions {
         alert.setHeaderText("Action non autorisée");
         alert.setContentText(switch (role) {
             case VISITOR -> "En tant que visiteur, vous pouvez uniquement consulter les données. "
-                    + "Connectez-vous en tant qu'artiste ou administrateur via le menu Compte.";
-            case ARTIST -> "En tant qu'artiste, vous pouvez modifier votre profil personnel et gérer les expositions. "
-                    + "Les autres modifications nécessitent un compte administrateur.";
+                    + "Connectez-vous en tant que membre, organisateur ou administrateur via le menu Compte.";
+            case MEMBER -> "En tant que membre, vous pouvez consulter les données et vous inscrire aux événements et ateliers. "
+                    + "Les modifications de contenu nécessitent un organisateur ou un administrateur.";
+            case ORGANIZER -> "En tant qu'organisateur, vous pouvez créer, modifier et supprimer les expositions et ateliers. "
+                    + "Les autres modifications nécessitent un administrateur.";
             case ADMIN -> "Cette action n'est pas disponible.";
         });
         alert.showAndWait();

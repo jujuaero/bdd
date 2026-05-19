@@ -13,6 +13,7 @@ public class DatabaseConfig {
     public static final String USER;
     public static final String PASSWORD;
     public static final String ADMIN_PASSWORD;
+    public static final String ORGANIZER_PASSWORD;
     public static final boolean USE_PERSISTENCE;
 
     static {
@@ -22,6 +23,7 @@ public class DatabaseConfig {
         String pwd = "Password123!";
         // default admin password for development; override via properties
         String adminPwd = "admin";
+        String organizerPwd = "organizer";
         boolean usePersistence = true;
         try (InputStream in = DatabaseConfig.class.getResourceAsStream("/database.properties")) {
             if (in != null) {
@@ -31,6 +33,7 @@ public class DatabaseConfig {
                 pwd = p.getProperty("password", pwd);
                 // support an admin password configured via 'adminPassword' property
                 adminPwd = p.getProperty("adminPassword", adminPwd);
+                organizerPwd = p.getProperty("organizerPassword", organizerPwd);
                 usePersistence = Boolean.parseBoolean(p.getProperty("usePersistence", String.valueOf(usePersistence)));
             }
         } catch (Exception e) {
@@ -40,6 +43,7 @@ public class DatabaseConfig {
         USER = user;
         PASSWORD = pwd;
         ADMIN_PASSWORD = adminPwd;
+        ORGANIZER_PASSWORD = organizerPwd;
         USE_PERSISTENCE = usePersistence;
     }
 
@@ -47,5 +51,9 @@ public class DatabaseConfig {
 
     public static String getAdminPassword() {
         return ADMIN_PASSWORD;
+    }
+
+    public static String getOrganizerPassword() {
+        return ORGANIZER_PASSWORD;
     }
 }
