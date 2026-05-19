@@ -1,5 +1,6 @@
 -- Schema SQL MySQL 8.x pour ArtConnect
 -- Source: MLD_ArtConnect.md
+drop database IF EXISTS artconnect_db;
 
 CREATE DATABASE IF NOT EXISTS artconnect_db
   CHARACTER SET utf8mb4

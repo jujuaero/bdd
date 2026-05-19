@@ -6,8 +6,8 @@ package com.project.artconnect.security;
 public enum UserRole {
     /** Read-only access to all data. */
     VISITOR("Visiteur"),
-    /** Can register and manage community membership; read-only elsewhere. */
-    USER("Utilisateur"),
+    /** Can manage own profile and artist-related content. */
+    ARTIST("Artiste"),
     /** Full create, update, and delete on all resources. */
     ADMIN("Administrateur");
 

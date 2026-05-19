@@ -21,7 +21,7 @@ public class MainController {
         String mode = usingJdbc ? "JDBC" : "In-Memory";
         UserRole role = AuthSession.get().getRole();
         String roleText = role.getDisplayName();
-        if (role == UserRole.USER && !AuthSession.get().getMemberEmail().isBlank()) {
+        if (role == UserRole.ARTIST && !AuthSession.get().getMemberEmail().isBlank()) {
             roleText += " (" + AuthSession.get().getMemberEmail() + ")";
         }
         if (modeLabel != null) {

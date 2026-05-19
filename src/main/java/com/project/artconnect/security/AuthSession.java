@@ -6,7 +6,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 /**
- * Holds the current user session (role and optional member identity for USER role).
+ * Holds the current user session (role and optional member identity for ARTIST role).
  */
 public final class AuthSession {
 

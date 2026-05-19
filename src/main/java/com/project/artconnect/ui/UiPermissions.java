@@ -27,10 +27,12 @@ public final class UiPermissions {
             if (!(node instanceof Button button)) continue;
             String text = button.getText();
             if (text == null) continue;
-            switch (text) {
-                case "Add" -> button.setDisable(!Permissions.canCreate(resource));
-                case "Edit" -> button.setDisable(!Permissions.canUpdate(resource));
-                case "Delete" -> button.setDisable(!Permissions.canDelete(resource));
+            switch (text.trim()) {
+                case "Add", "Ajouter" -> button.setDisable(!Permissions.canCreate(resource));
+                case "Add Exhibition", "Ajouter expos", "Ajouter exposition" ->
+                        button.setDisable(!Permissions.canCreate(Permissions.Resource.EXHIBITIONS));
+                case "Edit", "Modifier" -> button.setDisable(!Permissions.canUpdate(resource));
+                case "Delete", "Supprimer" -> button.setDisable(!Permissions.canDelete(resource));
                 default -> { /* Search, Reset, Refresh stay enabled */ }
             }
         }
@@ -61,8 +63,8 @@ public final class UiPermissions {
         alert.setHeaderText("Action non autorisée");
         alert.setContentText(switch (role) {
             case VISITOR -> "En tant que visiteur, vous pouvez uniquement consulter les données. "
-                    + "Connectez-vous en tant qu'utilisateur ou administrateur via le menu Compte.";
-            case USER -> "En tant qu'utilisateur, vous pouvez vous inscrire et gérer les membres de la communauté. "
+                    + "Connectez-vous en tant qu'artiste ou administrateur via le menu Compte.";
+            case ARTIST -> "En tant qu'artiste, vous pouvez modifier votre profil personnel et gérer les expositions. "
                     + "Les autres modifications nécessitent un compte administrateur.";
             case ADMIN -> "Cette action n'est pas disponible.";
         });

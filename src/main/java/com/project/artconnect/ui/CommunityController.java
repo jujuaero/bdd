@@ -64,7 +64,7 @@ public class CommunityController {
     private void handleAddMember() {
         if (!UiPermissions.checkCreate(Permissions.Resource.COMMUNITY)) return;
         CommunityMember draft = new CommunityMember();
-        if (AuthSession.get().getRole() == UserRole.USER) {
+        if (AuthSession.get().getRole() == UserRole.ARTIST) {
             draft.setEmail(AuthSession.get().getMemberEmail());
         }
         if (showMemberDialog("Add Member", draft, false)) {
@@ -78,6 +78,11 @@ public class CommunityController {
         if (!UiPermissions.checkUpdate(Permissions.Resource.COMMUNITY)) return;
         CommunityMember selected = memberTable.getSelectionModel().getSelectedItem();
         if (selected == null) { showError("No selection", "Please select a member to edit."); return; }
+        if (AuthSession.get().getRole() == UserRole.ARTIST
+                && !selected.getEmail().equalsIgnoreCase(AuthSession.get().getMemberEmail())) {
+            showError("Accès refusé", "En tant qu'artiste, vous ne pouvez modifier que votre propre fiche.");
+            return;
+        }
         CommunityMember edited = new CommunityMember();
         edited.setId(selected.getId());
         edited.setName(selected.getName());

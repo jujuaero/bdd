@@ -18,7 +18,7 @@ public final class Permissions {
     public static boolean canCreate(Resource resource) {
         return switch (AuthSession.get().getRole()) {
             case ADMIN -> true;
-            case USER -> resource == Resource.COMMUNITY;
+            case ARTIST -> resource == Resource.EXHIBITIONS;
             case VISITOR -> false;
         };
     }
@@ -26,7 +26,7 @@ public final class Permissions {
     public static boolean canUpdate(Resource resource) {
         return switch (AuthSession.get().getRole()) {
             case ADMIN -> true;
-            case USER -> resource == Resource.COMMUNITY;
+            case ARTIST -> resource == Resource.COMMUNITY || resource == Resource.EXHIBITIONS;
             case VISITOR -> false;
         };
     }

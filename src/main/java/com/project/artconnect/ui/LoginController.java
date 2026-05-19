@@ -2,7 +2,7 @@ package com.project.artconnect.ui;
 
 import com.project.artconnect.security.AuthSession;
 import com.project.artconnect.security.UserRole;
-import com.project.artconnect.util.DatabaseConfig;
+import com.project.artconnect.config.DatabaseConfig;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -40,17 +40,17 @@ public class LoginController {
             }
         });
         roleCombo.valueProperty().addListener((obs, oldVal, role) -> {
-            boolean isUser = role == UserRole.USER;
+            boolean isArtist = role == UserRole.ARTIST;
             boolean isAdmin = role == UserRole.ADMIN;
-            emailField.setVisible(isUser);
-            emailField.setManaged(isUser);
-            emailLabel.setVisible(isUser);
-            emailLabel.setManaged(isUser);
+            emailField.setVisible(isArtist);
+            emailField.setManaged(isArtist);
+            emailLabel.setVisible(isArtist);
+            emailLabel.setManaged(isArtist);
 
-            passwordField.setVisible(isUser || isAdmin);
-            passwordField.setManaged(isUser || isAdmin);
-            passwordLabel.setVisible(isUser || isAdmin);
-            passwordLabel.setManaged(isUser || isAdmin);
+            passwordField.setVisible(isArtist || isAdmin);
+            passwordField.setManaged(isArtist || isAdmin);
+            passwordLabel.setVisible(isArtist || isAdmin);
+            passwordLabel.setManaged(isArtist || isAdmin);
         });
         // initial state
         emailField.setVisible(false);
@@ -66,7 +66,7 @@ public class LoginController {
     public boolean applySession() {
         UserRole role = roleCombo.getValue() == null ? UserRole.VISITOR : roleCombo.getValue();
 
-        // Validate credentials for USER and ADMIN
+        // Validate credentials for ARTIST and ADMIN
         if (role == UserRole.ADMIN) {
             String pwd = passwordField.getText() == null ? "" : passwordField.getText();
             if (pwd.isEmpty()) {
@@ -74,7 +74,7 @@ public class LoginController {
                 return false;
             }
             // admin uses configured admin password
-            if (!pwd.equals(DatabaseConfig.ADMIN_PASSWORD)) {
+            if (!pwd.equals(DatabaseConfig.getAdminPassword())) {
                 showAlert("Connexion", "Échec de l'authentification", "Mot de passe administrateur invalide.");
                 return false;
             }
@@ -83,15 +83,15 @@ public class LoginController {
             return true;
         }
 
-        if (role == UserRole.USER) {
+        if (role == UserRole.ARTIST) {
             String email = emailField.getText() == null ? "" : emailField.getText().trim();
             String pwd = passwordField.getText() == null ? "" : passwordField.getText();
             if (email.isEmpty()) {
-                showAlert("Connexion", "E-mail requis", "Les utilisateurs doivent saisir un e-mail pour s'inscrire ou se connecter.");
+                showAlert("Connexion", "E-mail requis", "Les artistes doivent saisir un e-mail pour s'inscrire ou se connecter.");
                 return false;
             }
             if (pwd.isEmpty()) {
-                showAlert("Connexion", "Mot de passe requis", "Veuillez saisir le mot de passe utilisateur.");
+                showAlert("Connexion", "Mot de passe requis", "Veuillez saisir le mot de passe artiste.");
                 return false;
             }
             // authenticate against stored community members (create account if absent)
@@ -100,10 +100,10 @@ public class LoginController {
             if (opt.isPresent()) {
                 var member = opt.get();
                 if (!pwd.equals(member.getPassword())) {
-                    showAlert("Connexion", "Échec de l'authentification", "Mot de passe utilisateur invalide.");
+                    showAlert("Connexion", "Échec de l'authentification", "Mot de passe artiste invalide.");
                     return false;
                 }
-                AuthSession.get().setRole(UserRole.USER);
+                AuthSession.get().setRole(UserRole.ARTIST);
                 AuthSession.get().setMemberEmail(email);
                 return true;
             } else {
@@ -111,7 +111,7 @@ public class LoginController {
                 javafx.scene.control.Alert a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
                 a.setTitle("Créer un compte");
                 a.setHeaderText("Aucun compte trouvé pour " + email);
-                a.setContentText("Voulez-vous créer un compte avec cet e-mail ?");
+                a.setContentText("Voulez-vous créer un compte artiste avec cet e-mail ?");
                 var res = a.showAndWait();
                 if (res.isPresent() && res.get() == javafx.scene.control.ButtonType.OK) {
                     com.project.artconnect.model.CommunityMember newMember = new com.project.artconnect.model.CommunityMember();
@@ -122,7 +122,7 @@ public class LoginController {
                     // defaults
                     newMember.setMembershipType("Standard");
                     cs.createMember(newMember);
-                    AuthSession.get().setRole(UserRole.USER);
+                    AuthSession.get().setRole(UserRole.ARTIST);
                     AuthSession.get().setMemberEmail(email);
                     return true;
                 }

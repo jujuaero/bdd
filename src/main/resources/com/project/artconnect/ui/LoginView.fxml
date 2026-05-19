@@ -13,10 +13,10 @@
     <Label text="Choisissez votre rôle pour cette session." wrapText="true"/>
     <Label text="Rôle :"/>
     <ComboBox fx:id="roleCombo" prefWidth="360" maxWidth="Infinity"/>
-    <Label fx:id="emailLabel" text="E-mail membre (utilisateur) :"/>
+    <Label fx:id="emailLabel" text="E-mail artiste :"/>
     <TextField fx:id="emailField" promptText="vous@exemple.com" prefWidth="360"/>
-    <Label fx:id="passwordLabel" text="Mot de passe (utilisateur/admin) :"/>
+    <Label fx:id="passwordLabel" text="Mot de passe (artiste/admin) :"/>
     <PasswordField fx:id="passwordField" promptText="Mot de passe" prefWidth="360"/>
-    <Label text="Visiteur : consultation seule · Utilisateur : inscription communauté · Admin : tout modifier"
+    <Label text="Visiteur : consultation seule · Artiste : modification de son profil et des expositions · Admin : tout modifier"
            wrapText="true" style="-fx-text-fill: #475569; -fx-font-size: 11px;"/>
 </VBox>
