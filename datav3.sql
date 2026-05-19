@@ -54,13 +54,14 @@ INSERT INTO gallery (name, address, owner_name, opening_hours, contact_phone, ra
 -- ---------------------------------------------------------
 -- 4. MEMBRES DE LA COMMUNAUTÉ
 -- ---------------------------------------------------------
-INSERT INTO community_member (name, email, birth_year, phone, city, membership_type) VALUES
-('Alice Dubois', 'alice.d@gmail.com', 1995, '+33 6 11 22 33 44', 'Paris', 'VIP'),
-('Jean Dupont', 'j.dupont@outlook.fr', 1988, '+33 6 55 44 33 22', 'Lyon', 'Standard'),
-('Sarah Connor', 's.connor@sky.net', 1984, '+1 213 555 0199', 'Los Angeles', 'Premium'),
-('Marc Lévy', 'm.levy@free.fr', 2000, '+33 6 77 88 99 00', 'Bordeaux', 'Standard'),
-('Sophie Morel', 's.morel@gmail.com', 1992, '+33 6 21 43 65 87', 'Marseille', 'Premium'),
-('Thomas Wright', 't.wright@web.uk', 1997, '+44 20 7946 0110', 'London', 'VIP');
+INSERT INTO community_member (name, email, password, birth_year, phone, city, membership_type) VALUES
+('Alice Dubois', 'alice.d@gmail.com', 'userpass', 1995, '+33 6 11 22 33 44', 'Paris', 'VIP'),
+('Jean Dupont', 'j.dupont@outlook.fr', 'userpass', 1988, '+33 6 55 44 33 22', 'Lyon', 'Standard'),
+('Sarah Connor', 's.connor@sky.net', 'userpass', 1984, '+1 213 555 0199', 'Los Angeles', 'Premium'),
+('Marc Lévy', 'm.levy@free.fr', 'userpass', 2000, '+33 6 77 88 99 00', 'Bordeaux', 'Standard'),
+('Sophie Morel', 's.morel@gmail.com', 'userpass', 1992, '+33 6 21 43 65 87', 'Marseille', 'Premium'),
+('Thomas Wright', 't.wright@web.uk', 'userpass', 1997, '+44 20 7946 0110', 'London', 'VIP');
+
 
 -- ---------------------------------------------------------
 -- 5. ARTIST_DISCIPLINE (Relations Croisées)

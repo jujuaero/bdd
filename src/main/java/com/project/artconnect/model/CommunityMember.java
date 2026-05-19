@@ -10,6 +10,7 @@ public class CommunityMember {
     private Integer birthYear;
     private String phone;
     private String city;
+    private String password;
     private List<Discipline> favoriteDisciplines = new ArrayList<>();
     private String membershipType; // free, premium
     private List<Booking> bookings = new ArrayList<>();
@@ -69,6 +70,14 @@ public class CommunityMember {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public List<Discipline> getFavoriteDisciplines() {

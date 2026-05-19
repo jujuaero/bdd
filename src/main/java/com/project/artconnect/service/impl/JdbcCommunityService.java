@@ -32,6 +32,32 @@ public class JdbcCommunityService implements CommunityService {
     }
 
     @Override
+    public Optional<CommunityMember> getMemberByEmail(String email) {
+        if (email == null || email.isBlank()) return Optional.empty();
+        String sql = "SELECT id, name, email, password, birth_year, phone, city, membership_type FROM community_member WHERE email = ?";
+        try (Connection conn = ConnectionManager.getConnection(); java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    CommunityMember m = new CommunityMember();
+                    m.setId(rs.getLong("id"));
+                    m.setName(rs.getString("name"));
+                    m.setEmail(rs.getString("email"));
+                    m.setPassword(rs.getString("password"));
+                    int by = rs.getInt("birth_year"); if (!rs.wasNull()) m.setBirthYear(by);
+                    m.setPhone(rs.getString("phone"));
+                    m.setCity(rs.getString("city"));
+                    m.setMembershipType(rs.getString("membership_type"));
+                    return Optional.of(m);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding member by email", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public List<Review> getReviewsByMember(CommunityMember member) {
         if (member == null) return Collections.emptyList();
         List<Review> res = new ArrayList<>();
@@ -62,14 +88,15 @@ public class JdbcCommunityService implements CommunityService {
 
     @Override
     public void createMember(CommunityMember member) {
-        String sql = "INSERT INTO community_member (name, email, birth_year, phone, city, membership_type) VALUES (?,?,?,?,?,?)";
+        String sql = "INSERT INTO community_member (name, email, password, birth_year, phone, city, membership_type) VALUES (?,?,?,?,?,?,?)";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, member.getName());
             ps.setString(2, member.getEmail());
-            if (member.getBirthYear() != null) ps.setInt(3, member.getBirthYear()); else ps.setNull(3, java.sql.Types.INTEGER);
-            ps.setString(4, member.getPhone());
-            ps.setString(5, member.getCity());
-            ps.setString(6, member.getMembershipType());
+            ps.setString(3, member.getPassword() == null ? "" : member.getPassword());
+            if (member.getBirthYear() != null) ps.setInt(4, member.getBirthYear()); else ps.setNull(4, java.sql.Types.INTEGER);
+            ps.setString(5, member.getPhone());
+            ps.setString(6, member.getCity());
+            ps.setString(7, member.getMembershipType());
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) { if (keys.next()) member.setId(keys.getLong(1)); }
         } catch (SQLException e) {
@@ -79,15 +106,16 @@ public class JdbcCommunityService implements CommunityService {
 
     @Override
     public void updateMember(CommunityMember member) {
-        String sql = "UPDATE community_member SET name=?, email=?, birth_year=?, phone=?, city=?, membership_type=? WHERE id=?";
+        String sql = "UPDATE community_member SET name=?, email=?, password=?, birth_year=?, phone=?, city=?, membership_type=? WHERE id=?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, member.getName());
             ps.setString(2, member.getEmail());
-            if (member.getBirthYear() != null) ps.setInt(3, member.getBirthYear()); else ps.setNull(3, java.sql.Types.INTEGER);
-            ps.setString(4, member.getPhone());
-            ps.setString(5, member.getCity());
-            ps.setString(6, member.getMembershipType());
-            ps.setLong(7, member.getId());
+            ps.setString(3, member.getPassword() == null ? "" : member.getPassword());
+            if (member.getBirthYear() != null) ps.setInt(4, member.getBirthYear()); else ps.setNull(4, java.sql.Types.INTEGER);
+            ps.setString(5, member.getPhone());
+            ps.setString(6, member.getCity());
+            ps.setString(7, member.getMembershipType());
+            ps.setLong(8, member.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error updating community member", e);

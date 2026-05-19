@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS community_member (
     id BIGINT NOT NULL AUTO_INCREMENT,
     name VARCHAR(150) NOT NULL,
     email VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL DEFAULT 'userpass',
     birth_year INT,
     phone VARCHAR(30),
     city VARCHAR(120),

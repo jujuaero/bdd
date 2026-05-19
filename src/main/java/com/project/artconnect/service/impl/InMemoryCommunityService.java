@@ -50,6 +50,13 @@ public class InMemoryCommunityService implements CommunityService {
     }
 
     @Override
+    public Optional<CommunityMember> getMemberByEmail(String email) {
+        if (email == null) return Optional.empty();
+        return members.values().stream()
+                .filter(m -> email.equals(m.getEmail()))
+                .findFirst();
+    }
+    @Override
     public List<Review> getReviewsByMember(CommunityMember member) {
         if (member == null)
             return Collections.emptyList();

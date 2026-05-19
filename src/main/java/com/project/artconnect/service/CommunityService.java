@@ -9,6 +9,7 @@ public interface CommunityService {
     List<CommunityMember> getAllMembers();
 
     Optional<CommunityMember> getMemberByName(String name);
+    Optional<CommunityMember> getMemberByEmail(String email);
 
     List<Review> getReviewsByMember(CommunityMember member);
 

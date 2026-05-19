@@ -17,7 +17,7 @@ public class JdbcCommunityMemberDao implements CommunityMemberDao {
 
     @Override
     public Optional<CommunityMember> findById(Long id) {
-        String sql = "SELECT id, name, email, birth_year, phone, city, membership_type FROM community_member WHERE id = ?";
+        String sql = "SELECT id, name, email, password, birth_year, phone, city, membership_type FROM community_member WHERE id = ?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -26,6 +26,7 @@ public class JdbcCommunityMemberDao implements CommunityMemberDao {
                     m.setId(rs.getLong("id"));
                     m.setName(rs.getString("name"));
                     m.setEmail(rs.getString("email"));
+                    m.setPassword(rs.getString("password"));
                     int by = rs.getInt("birth_year"); if (!rs.wasNull()) m.setBirthYear(by);
                     m.setPhone(rs.getString("phone"));
                     m.setCity(rs.getString("city"));
@@ -43,13 +44,14 @@ public class JdbcCommunityMemberDao implements CommunityMemberDao {
     @Override
     public List<CommunityMember> findAll() {
         List<CommunityMember> res = new ArrayList<>();
-        String sql = "SELECT id, name, email, birth_year, phone, city, membership_type FROM community_member";
+        String sql = "SELECT id, name, email, password, birth_year, phone, city, membership_type FROM community_member";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 CommunityMember m = new CommunityMember();
                 m.setId(rs.getLong("id"));
                 m.setName(rs.getString("name"));
                 m.setEmail(rs.getString("email"));
+                m.setPassword(rs.getString("password"));
                 int by = rs.getInt("birth_year"); if (!rs.wasNull()) m.setBirthYear(by);
                 m.setPhone(rs.getString("phone"));
                 m.setCity(rs.getString("city"));
