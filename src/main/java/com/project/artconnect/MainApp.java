@@ -46,11 +46,13 @@ public class MainApp extends Application {
         }
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/project/artconnect/ui/MainView.fxml"));
-        Scene scene = new Scene(loader.load(), 1200, 800);
+        Scene scene = new Scene(loader.load(), 1300, 900);
         scene.getStylesheets().add(
                 getClass().getResource("/com/project/artconnect/ui/artconnect.css").toExternalForm());
         stage.setTitle("ArtConnect Pro - Local Art Community Platform");
         stage.setScene(scene);
+        stage.setMinWidth(1100);
+        stage.setMinHeight(700);
         stage.show();
     }
 

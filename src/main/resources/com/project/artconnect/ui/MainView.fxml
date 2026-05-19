@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox prefHeight="800.0" prefWidth="1200.0" styleClass="root" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.project.artconnect.ui.MainController">
+<VBox prefHeight="900.0" prefWidth="1300.0" minWidth="1100.0" minHeight="700.0" styleClass="root" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.project.artconnect.ui.MainController">
     <MenuBar>
         <Menu text="Compte">
             <MenuItem text="Changer de rôle..." onAction="#handleSwitchAccount"/>

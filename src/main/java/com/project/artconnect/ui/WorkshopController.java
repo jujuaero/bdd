@@ -156,6 +156,7 @@ public class WorkshopController {
         if (editing) titleField.setDisable(true);
 
         GridPane grid = new GridPane();
+        InputValidation.configureDialogGrid(grid);
         grid.setHgap(8); grid.setVgap(8);
         grid.add(new Label("Title:"), 0, 0); grid.add(titleField, 1, 0);
         grid.add(new Label("Instructor:"), 0, 1); grid.add(artistBox, 1, 1);
@@ -178,7 +179,17 @@ public class WorkshopController {
         GridPane.setHgrow(descField, Priority.ALWAYS);
         GridPane.setHgrow(levelField, Priority.ALWAYS);
         GridPane.setHgrow(artistBox, Priority.ALWAYS);
+        titleField.setMaxWidth(Double.MAX_VALUE);
+        dateField.setMaxWidth(Double.MAX_VALUE);
+        durationField.setMaxWidth(Double.MAX_VALUE);
+        maxField.setMaxWidth(Double.MAX_VALUE);
+        priceField.setMaxWidth(Double.MAX_VALUE);
+        locationField.setMaxWidth(Double.MAX_VALUE);
+        descField.setMaxWidth(Double.MAX_VALUE);
+        levelField.setMaxWidth(Double.MAX_VALUE);
+        artistBox.setMaxWidth(Double.MAX_VALUE);
         dialog.getDialogPane().setContent(grid);
+        InputValidation.configureDialogPane(dialog.getDialogPane());
         InputValidation.bindOkButton(dialog, durationValidation, maxValidation, priceValidation);
 
         if (dialog.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return false;

@@ -155,6 +155,8 @@
     -fx-font-size: 12px;
     -fx-text-fill: #dc2626;
     -fx-padding: 2 0 0 2;
+    -fx-wrap-text: true;
+    -fx-max-width: 100%;
 }
 .validation-hint.valid {
     -fx-text-fill: #15803d;

@@ -4,11 +4,14 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.geometry.HPos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -52,6 +55,8 @@ public final class InputValidation {
 
         ValidatedField() {
             hint.getStyleClass().add("validation-hint");
+            hint.setWrapText(true);
+            hint.setMaxWidth(Double.MAX_VALUE);
             hint.setVisible(false);
             hint.setManaged(false);
         }
@@ -81,9 +86,36 @@ public final class InputValidation {
     public static void addRow(GridPane grid, int row, String labelText, TextField field, ValidatedField validated) {
         grid.add(new Label(labelText), 0, row);
         VBox fieldBox = new VBox(2, field, validated.hintLabel());
+        fieldBox.setFillWidth(true);
+        fieldBox.setMaxWidth(Double.MAX_VALUE);
+        field.setMaxWidth(Double.MAX_VALUE);
+        validated.hintLabel().setWrapText(true);
+        validated.hintLabel().setMaxWidth(Double.MAX_VALUE);
         grid.add(fieldBox, 1, row);
         GridPane.setHgrow(fieldBox, Priority.ALWAYS);
         GridPane.setHgrow(field, Priority.ALWAYS);
+    }
+
+    public static void configureDialogGrid(GridPane grid) {
+        ColumnConstraints labelColumn = new ColumnConstraints();
+        labelColumn.setMinWidth(160);
+        labelColumn.setPrefWidth(210);
+        labelColumn.setHalignment(HPos.RIGHT);
+
+        ColumnConstraints valueColumn = new ColumnConstraints();
+        valueColumn.setHgrow(Priority.ALWAYS);
+        valueColumn.setFillWidth(true);
+        valueColumn.setMinWidth(300);
+
+        grid.getColumnConstraints().setAll(labelColumn, valueColumn);
+        grid.setMaxWidth(Double.MAX_VALUE);
+    }
+
+    public static void configureDialogPane(DialogPane dialogPane) {
+        dialogPane.setMinWidth(700);
+        dialogPane.setMaxWidth(1000);
+        dialogPane.setMinHeight(500);
+        dialogPane.setMaxHeight(800);
     }
 
     /** Disables the OK button while any validated field is invalid. */

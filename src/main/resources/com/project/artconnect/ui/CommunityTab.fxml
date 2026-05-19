@@ -15,7 +15,7 @@
         <Button text="Delete" onAction="#handleDeleteMember" styleClass="danger" />
         <Button text="Refresh" onAction="#handleRefresh" styleClass="secondary" />
     </HBox>
-    <TableView fx:id="memberTable" VBox.vgrow="ALWAYS" prefHeight="300">
+    <TableView fx:id="memberTable" VBox.vgrow="ALWAYS" prefHeight="350">
         <columns>
             <TableColumn fx:id="nameColumn" text="Name" prefWidth="250" />
             <TableColumn fx:id="emailColumn" text="Email" prefWidth="250" />

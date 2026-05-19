@@ -2,7 +2,7 @@ package com.project.artconnect.ui;
 
 import com.project.artconnect.security.AuthSession;
 import com.project.artconnect.security.UserRole;
-import com.project.artconnect.config.DatabaseConfig;
+import com.project.artconnect.util.DatabaseConfig;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
