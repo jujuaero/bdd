@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,11 +93,13 @@ public class JdbcBookingDao implements BookingDao {
             if (booking.getMember() == null || booking.getMember().getId() == null) {
                 throw new RuntimeException("Member id is required to save booking");
             }
-            try (CallableStatement cs = conn.prepareCall(call)) {
-                cs.setLong(1, booking.getWorkshop().getId());
-                cs.setLong(2, booking.getMember().getId());
-                cs.setString(3, booking.getPaymentStatus() != null ? booking.getPaymentStatus() : "PENDING");
-                cs.executeUpdate();
+            try {
+                try (CallableStatement cs = conn.prepareCall(call)) {
+                    cs.setLong(1, booking.getWorkshop().getId());
+                    cs.setLong(2, booking.getMember().getId());
+                    cs.setString(3, booking.getPaymentStatus() != null ? booking.getPaymentStatus() : "PENDING");
+                    cs.executeUpdate();
+                }
                 String idQuery = "SELECT id FROM booking WHERE workshop_id = ? AND member_id = ? ORDER BY id DESC LIMIT 1";
                 try (PreparedStatement ps = conn.prepareStatement(idQuery)) {
                     ps.setLong(1, booking.getWorkshop().getId());
@@ -105,10 +108,37 @@ public class JdbcBookingDao implements BookingDao {
                         if (rs.next()) booking.setId(rs.getLong("id"));
                     }
                 }
+            } catch (SQLException procEx) {
+                // Try fallback: direct insert if stored procedure doesn't exist or fails.
+                StringBuilder combined = new StringBuilder();
+                combined.append(procEx.getMessage());
+                boolean inserted = false;
+                try {
+                    String insertSql = "INSERT INTO booking (workshop_id, member_id, booking_date, payment_status) VALUES (?,?,?,?)";
+                    try (PreparedStatement ips = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
+                        ips.setLong(1, booking.getWorkshop().getId());
+                        ips.setLong(2, booking.getMember().getId());
+                        ips.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+                        ips.setString(4, booking.getPaymentStatus() != null ? booking.getPaymentStatus() : "PENDING");
+                        ips.executeUpdate();
+                        try (ResultSet rs = ips.getGeneratedKeys()) { if (rs.next()) booking.setId(rs.getLong(1)); }
+                    }
+                    inserted = true;
+                    combined.append("; fallback insert succeeded");
+                } catch (SQLException insertEx) {
+                    combined.append("; fallback insert failed: ").append(insertEx.getMessage());
+                }
+                if (!inserted) {
+                    throw new SQLException(combined.toString(), procEx);
+                }
             }
             conn.commit();
         } catch (SQLException e) {
-            throw new RuntimeException("Error saving booking via stored procedure", e);
+            String extra = "";
+            try {
+                extra = " SQLState=" + e.getSQLState() + " ErrorCode=" + e.getErrorCode();
+            } catch (Throwable ignored) {}
+            throw new RuntimeException("Error saving booking via stored procedure: " + e.getMessage() + extra, e);
         }
     }
 

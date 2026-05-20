@@ -18,7 +18,8 @@ public final class Permissions {
     public static boolean canCreate(Resource resource) {
         return switch (AuthSession.get().getRole()) {
             case ADMIN -> true;
-            case ORGANIZER -> resource == Resource.EXHIBITIONS || resource == Resource.WORKSHOPS;
+            // Allow organizers to create exhibitions, workshops and bookings
+            case ORGANIZER -> resource == Resource.EXHIBITIONS || resource == Resource.WORKSHOPS || resource == Resource.BOOKINGS;
             case VISITOR -> false;
             case MEMBER -> false;
         };
