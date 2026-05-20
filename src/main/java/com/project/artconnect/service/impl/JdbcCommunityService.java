@@ -7,6 +7,7 @@ import com.project.artconnect.model.Artwork;
 import com.project.artconnect.service.CommunityService;
 import com.project.artconnect.persistence.JdbcCommunityMemberDao;
 import com.project.artconnect.util.ConnectionManager;
+import com.project.artconnect.util.PasswordEncoder;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -92,7 +93,11 @@ public class JdbcCommunityService implements CommunityService {
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, member.getName());
             ps.setString(2, member.getEmail());
-            ps.setString(3, member.getPassword() == null ? "" : member.getPassword());
+            // Hash password using bcrypt before storing
+            String hashedPassword = member.getPassword() == null || member.getPassword().isEmpty()
+                ? PasswordEncoder.encode("userpass")
+                : PasswordEncoder.encode(member.getPassword());
+            ps.setString(3, hashedPassword);
             if (member.getBirthYear() != null) ps.setInt(4, member.getBirthYear()); else ps.setNull(4, java.sql.Types.INTEGER);
             ps.setString(5, member.getPhone());
             ps.setString(6, member.getCity());
@@ -110,7 +115,11 @@ public class JdbcCommunityService implements CommunityService {
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, member.getName());
             ps.setString(2, member.getEmail());
-            ps.setString(3, member.getPassword() == null ? "" : member.getPassword());
+            // Hash password using bcrypt if provided
+            String hashedPassword = member.getPassword() == null || member.getPassword().isEmpty()
+                ? PasswordEncoder.encode("userpass")
+                : PasswordEncoder.encode(member.getPassword());
+            ps.setString(3, hashedPassword);
             if (member.getBirthYear() != null) ps.setInt(4, member.getBirthYear()); else ps.setNull(4, java.sql.Types.INTEGER);
             ps.setString(5, member.getPhone());
             ps.setString(6, member.getCity());

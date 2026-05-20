@@ -24,6 +24,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import com.project.artconnect.util.PasswordEncoder;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -48,10 +49,14 @@ public final class DatabaseSeeder {
             conn = ConnectionManager.getConnection();
             if (!isDatabaseEmpty(conn)) {
                 System.out.println("[Seeder] Database already contains data; skipping RAM import.");
+                // Even if the DB already contains data, ensure any plaintext passwords are migrated to bcrypt
+                ensurePasswordsAreHashed(conn);
                 return;
             }
             seed(conn);
             System.out.println("[Seeder] Database seeded from in-memory demo data.");
+            // After seeding, make sure any password values (possibly coming from datav3.sql) are hashed
+            ensurePasswordsAreHashed(conn);
         } catch (SQLException e) {
             throw new RuntimeException("Failed to seed database from in-memory data", e);
         } finally {
@@ -59,6 +64,40 @@ public final class DatabaseSeeder {
                 try {
                     conn.close();
                 } catch (SQLException ignored) {
+                }
+            }
+        }
+    }
+
+    /**
+     * Ensures all passwords in `community_member` are bcrypt-hashed.
+     * If a password is null/empty it will be replaced by a bcrypt hash of the default 'userpass'.
+     * If it does not start with a bcrypt prefix ($2a$, $2b$, $2y$) it will be re-hashed.
+     */
+    private static void ensurePasswordsAreHashed(Connection conn) throws SQLException {
+        String selectSql = "SELECT id, password FROM community_member";
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(selectSql)) {
+            while (rs.next()) {
+                long id = rs.getLong("id");
+                String pwd = rs.getString("password");
+                boolean needsHash = false;
+                if (pwd == null || pwd.isEmpty()) {
+                    needsHash = true;
+                } else {
+                    String lower = pwd;
+                    // check common bcrypt prefixes
+                    if (!(lower.startsWith("$2a$") || lower.startsWith("$2b$") || lower.startsWith("$2y$"))) {
+                        needsHash = true;
+                    }
+                }
+                if (needsHash) {
+                    String toHash = (pwd == null || pwd.isEmpty()) ? "userpass" : pwd;
+                    String hashed = PasswordEncoder.encode(toHash);
+                    try (PreparedStatement ps = conn.prepareStatement("UPDATE community_member SET password = ? WHERE id = ?")) {
+                        ps.setString(1, hashed);
+                        ps.setLong(2, id);
+                        ps.executeUpdate();
+                    }
                 }
             }
         }
