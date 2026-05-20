@@ -16,8 +16,23 @@ public class JdbcBookingService implements BookingService {
     }
 
     @Override
+    public List<Booking> getAllBookings() {
+        return dao.findAll();
+    }
+
+    @Override
     public void createBooking(Booking booking) {
         dao.save(booking);
+    }
+
+    @Override
+    public void updateBooking(Booking booking) {
+        dao.update(booking);
+    }
+
+    @Override
+    public void deleteBooking(Long bookingId) {
+        dao.delete(bookingId);
     }
 }
 

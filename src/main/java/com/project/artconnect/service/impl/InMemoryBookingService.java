@@ -21,8 +21,28 @@ public class InMemoryBookingService implements BookingService {
     }
 
     @Override
+    public List<Booking> getAllBookings() {
+        return new ArrayList<>(list);
+    }
+
+    @Override
     public void createBooking(Booking booking) {
         list.add(booking);
+    }
+
+    @Override
+    public void updateBooking(Booking booking) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId() != null && list.get(i).getId().equals(booking.getId())) {
+                list.set(i, booking);
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void deleteBooking(Long bookingId) {
+        list.removeIf(b -> b.getId() != null && b.getId().equals(bookingId));
     }
 }
 

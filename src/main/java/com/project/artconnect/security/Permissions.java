@@ -6,7 +6,7 @@ package com.project.artconnect.security;
 public final class Permissions {
 
     public enum Resource {
-        ARTISTS, ARTWORKS, GALLERIES, EXHIBITIONS, WORKSHOPS, COMMUNITY
+        ARTISTS, ARTWORKS, GALLERIES, EXHIBITIONS, WORKSHOPS, BOOKINGS, COMMUNITY
     }
 
     private Permissions() {}
