@@ -3,6 +3,7 @@ package com.project.artconnect.ui;
 import com.project.artconnect.security.AuthSession;
 import com.project.artconnect.security.UserRole;
 import com.project.artconnect.util.DatabaseConfig;
+import com.project.artconnect.util.PasswordEncoder;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -113,7 +114,8 @@ public class LoginController {
             var opt = cs.getMemberByEmail(email);
             if (opt.isPresent()) {
                 var member = opt.get();
-                if (!pwd.equals(member.getPassword())) {
+                // Verify password using bcrypt
+                if (!PasswordEncoder.matches(pwd, member.getPassword())) {
                     showAlert("Connexion", "Échec de l'authentification", "Mot de passe membre invalide.");
                     return false;
                 }
@@ -132,7 +134,8 @@ public class LoginController {
                     String name = email.contains("@") ? email.substring(0, email.indexOf('@')) : email;
                     newMember.setName(name);
                     newMember.setEmail(email);
-                    newMember.setPassword(pwd);
+                    // Hash password using bcrypt before storing
+                    newMember.setPassword(PasswordEncoder.encode(pwd));
                     // defaults
                     newMember.setMembershipType("Standard");
                     cs.createMember(newMember);

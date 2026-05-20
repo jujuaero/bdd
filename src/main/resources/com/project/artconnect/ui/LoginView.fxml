@@ -5,7 +5,7 @@
 <?import javafx.geometry.Insets?>
 
 <VBox spacing="14" alignment="CENTER" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.project.artconnect.ui.LoginController" prefWidth="420" prefHeight="310">
+      fx:controller="com.project.artconnect.ui.LoginController" prefWidth="420" prefHeight="400">
     <padding>
         <Insets top="24" right="28" bottom="24" left="28"/>
     </padding>

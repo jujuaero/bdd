@@ -5,6 +5,7 @@ import com.project.artconnect.model.Review;
 import com.project.artconnect.model.Artwork;
 import com.project.artconnect.service.CommunityService;
 import com.project.artconnect.service.ArtworkService;
+import com.project.artconnect.util.PasswordEncoder;
 import java.util.*;
 
 public class InMemoryCommunityService implements CommunityService {
@@ -67,6 +68,10 @@ public class InMemoryCommunityService implements CommunityService {
     public void createMember(CommunityMember member) {
         if (member != null && member.getName() != null) {
             if (member.getId() == null) member.setId((long) (members.size() + 1));
+            // Hash password before storing
+            if (member.getPassword() != null && !member.getPassword().isEmpty()) {
+                member.setPassword(PasswordEncoder.encode(member.getPassword()));
+            }
             members.put(member.getName(), member);
         }
     }
