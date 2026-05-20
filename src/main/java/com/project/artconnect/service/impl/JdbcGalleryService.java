@@ -166,5 +166,20 @@ public class JdbcGalleryService implements GalleryService {
             throw new RuntimeException("Error deleting exhibition", e);
         }
     }
+    
+    public int getGalleryExhibitionCount(Long galleryId) {
+        String sql = "SELECT fn_gallery_exhibition_count(?) AS exhibition_count";
+        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, galleryId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("exhibition_count");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error getting gallery exhibition count", e);
+        }
+        return 0;
+    }
 }
 

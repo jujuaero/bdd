@@ -6,6 +6,7 @@ import com.project.artconnect.model.CommunityMember;
 import com.project.artconnect.model.Workshop;
 import com.project.artconnect.util.ConnectionManager;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -82,7 +83,7 @@ public class JdbcBookingDao implements BookingDao {
 
     @Override
     public void save(Booking booking) {
-        String sqlInsert = "INSERT INTO booking (workshop_id, member_id, booking_date, payment_status) VALUES (?, ?, ?, ?)";
+        String call = "{call sp_book_workshop(?, ?, ?)}";
         try (Connection conn = ConnectionManager.getConnection()) {
             conn.setAutoCommit(false);
             if (booking.getWorkshop() == null || booking.getWorkshop().getId() == null) {
@@ -91,17 +92,23 @@ public class JdbcBookingDao implements BookingDao {
             if (booking.getMember() == null || booking.getMember().getId() == null) {
                 throw new RuntimeException("Member id is required to save booking");
             }
-            try (PreparedStatement ps = conn.prepareStatement(sqlInsert, java.sql.Statement.RETURN_GENERATED_KEYS)) {
-                ps.setLong(1, booking.getWorkshop().getId());
-                ps.setLong(2, booking.getMember().getId());
-                ps.setTimestamp(3, booking.getBookingDate() == null ? new Timestamp(System.currentTimeMillis()) : Timestamp.valueOf(booking.getBookingDate()));
-                ps.setString(4, booking.getPaymentStatus());
-                ps.executeUpdate();
-                try (ResultSet keys = ps.getGeneratedKeys()) { if (keys.next()) booking.setId(keys.getLong(1)); }
+            try (CallableStatement cs = conn.prepareCall(call)) {
+                cs.setLong(1, booking.getWorkshop().getId());
+                cs.setLong(2, booking.getMember().getId());
+                cs.setString(3, booking.getPaymentStatus() != null ? booking.getPaymentStatus() : "PENDING");
+                cs.executeUpdate();
+                String idQuery = "SELECT id FROM booking WHERE workshop_id = ? AND member_id = ? ORDER BY id DESC LIMIT 1";
+                try (PreparedStatement ps = conn.prepareStatement(idQuery)) {
+                    ps.setLong(1, booking.getWorkshop().getId());
+                    ps.setLong(2, booking.getMember().getId());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) booking.setId(rs.getLong("id"));
+                    }
+                }
             }
             conn.commit();
         } catch (SQLException e) {
-            throw new RuntimeException("Error saving booking", e);
+            throw new RuntimeException("Error saving booking via stored procedure", e);
         }
     }
 

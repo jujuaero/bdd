@@ -147,5 +147,35 @@ public class JdbcWorkshopService implements WorkshopService {
             throw new RuntimeException("Error deleting workshop", e);
         }
     }
+
+    public int getRemainingWorkshopPlaces(Long workshopId) {
+        String sql = "SELECT fn_remaining_workshop_places(?) AS remaining_places";
+        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, workshopId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("remaining_places");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error getting remaining workshop places", e);
+        }
+        return 0;
+    }
+
+    public int getWorkshopParticipantCount(Long workshopId) {
+        String sql = "SELECT fn_workshop_participant_count(?) AS participant_count";
+        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, workshopId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("participant_count");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error getting workshop participant count", e);
+        }
+        return 0;
+    }
 }
 

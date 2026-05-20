@@ -5,11 +5,13 @@ import com.project.artconnect.model.Exhibition;
 import com.project.artconnect.model.Gallery;
 import com.project.artconnect.util.ConnectionManager;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,28 +50,36 @@ public class JdbcExhibitionDao implements ExhibitionDao {
 
     @Override
     public void save(Exhibition exhibition) {
-        String insert = "INSERT INTO exhibition (gallery_id, title, start_date, end_date, description, curator_name, theme) VALUES (?,?,?,?,?,?,?)";
+        // Use stored procedure sp_create_exhibition
+        String call = "{call sp_create_exhibition(?, ?, ?, ?, ?, ?, ?)}";
         try (Connection conn = ConnectionManager.getConnection()) {
             conn.setAutoCommit(false);
             if (exhibition.getGallery() == null || exhibition.getGallery().getId() == null) {
                 throw new RuntimeException("Gallery id is required to save exhibition");
             }
-            try (PreparedStatement psIns = conn.prepareStatement(insert, java.sql.Statement.RETURN_GENERATED_KEYS)) {
-                psIns.setLong(1, exhibition.getGallery().getId());
-                psIns.setString(2, exhibition.getTitle());
-                psIns.setDate(3, exhibition.getStartDate() != null ? Date.valueOf(exhibition.getStartDate()) : null);
-                psIns.setDate(4, exhibition.getEndDate() != null ? Date.valueOf(exhibition.getEndDate()) : null);
-                psIns.setString(5, exhibition.getDescription());
-                psIns.setString(6, exhibition.getCuratorName());
-                psIns.setString(7, exhibition.getTheme());
-                psIns.executeUpdate();
-                try (ResultSet keys = psIns.getGeneratedKeys()) {
-                    if (keys.next()) exhibition.setId(keys.getLong(1));
+            try (CallableStatement cs = conn.prepareCall(call)) {
+                cs.setLong(1, exhibition.getGallery().getId());
+                cs.setString(2, exhibition.getTitle());
+                cs.setDate(3, exhibition.getStartDate() != null ? Date.valueOf(exhibition.getStartDate()) : null);
+                cs.setDate(4, exhibition.getEndDate() != null ? Date.valueOf(exhibition.getEndDate()) : null);
+                cs.setString(5, exhibition.getDescription());
+                cs.setString(6, exhibition.getCuratorName());
+                cs.setString(7, exhibition.getTheme());
+                cs.executeUpdate();
+                
+                // Retrieve generated ID via query
+                String idQuery = "SELECT id FROM exhibition WHERE title = ? AND gallery_id = ? ORDER BY id DESC LIMIT 1";
+                try (PreparedStatement ps = conn.prepareStatement(idQuery)) {
+                    ps.setString(1, exhibition.getTitle());
+                    ps.setLong(2, exhibition.getGallery().getId());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) exhibition.setId(rs.getLong("id"));
+                    }
                 }
             }
             conn.commit();
         } catch (SQLException e) {
-            throw new RuntimeException("Error saving exhibition", e);
+            throw new RuntimeException("Error saving exhibition via stored procedure", e);
         }
     }
 

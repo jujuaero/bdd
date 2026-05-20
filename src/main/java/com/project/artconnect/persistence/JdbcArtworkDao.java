@@ -5,13 +5,13 @@ import com.project.artconnect.model.Artwork;
 import com.project.artconnect.model.Artist;
 import com.project.artconnect.util.ConnectionManager;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.List;
 
 /**
@@ -169,5 +169,23 @@ public class JdbcArtworkDao implements ArtworkDao {
             throw new RuntimeException("Error finding artworks by artist", e);
         }
         return result;
+    }
+
+    public void addArtworkToExhibition(Long exhibitionId, Long artworkId) {
+        String call = "{call sp_add_artwork_to_exhibition(?, ?)}";
+        try (Connection conn = ConnectionManager.getConnection()) {
+            conn.setAutoCommit(false);
+            if (exhibitionId == null || artworkId == null) {
+                throw new RuntimeException("Exhibition id and artwork id are required");
+            }
+            try (CallableStatement cs = conn.prepareCall(call)) {
+                cs.setLong(1, exhibitionId);
+                cs.setLong(2, artworkId);
+                cs.executeUpdate();
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error adding artwork to exhibition via stored procedure", e);
+        }
     }
 }
